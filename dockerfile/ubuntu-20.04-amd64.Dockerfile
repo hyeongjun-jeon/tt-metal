@@ -41,7 +41,7 @@ RUN python3 -m pip config set global.extra-index-url https://download.pytorch.or
     && python3 -m pip install setuptools wheel
 
 RUN python3 -m pip install -r ${TT_METAL_INFRA_DIR}/tt-metal/tt_metal/python_env/requirements-dev.txt
-RUN python3 -m pip install -r ${TT_METAL_INFRA_DIR}/tt-metal/docs/requirements-docs.txt
+RUN python3 -m pip install -r ${TT_METAL_INFRA_DIR}/tt-metal/docs/requirements-docs.txt 
 
 # Install Clang-17
 RUN cd $TT_METAL_INFRA_DIR \
