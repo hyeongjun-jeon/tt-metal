@@ -21,7 +21,6 @@ inputs:
   docker_opts:
     description: 'Docker options'
     required: false
-
 runs:
   using: "composite"
   steps:  
@@ -59,10 +58,6 @@ runs:
         options: |
           -u ${{ env.RUNNER_UID }}:${{ env.RUNNER_GID }}
           -v ${{ github.workspace }}:/app/mtl
-          -v /home/ubuntu/.cache/huggingface:/home/ubuntu/.cache/huggingface
-          -v /home/ubuntu/.cache/matplotlib:/home/ubuntu/.cache/matplotlib
-          -v /home/ubuntu/.cache/pre-commit:/home/ubuntu/.cache/pre-commit
-          -v /home/ubuntu/.cache/torch:/home/ubuntu/.cache/torch
           --net=host
           ${{ inputs.docker_opts }}
         run: |

@@ -1,9 +1,13 @@
 name: "Build tt-metal docker artifact"
 
 on:
-  workflow_call:
   workflow_dispatch:
-
+  push:
+    branches:
+      - dimitri/8082-use-containers-rebased # Needs to be changed before the merge
+    paths:
+      - dockerfile/ubuntu-20.04-amd64.Dockerfile
+      # Add requirements.txt, project.toml
 jobs:
   build-docker-image:
     env:

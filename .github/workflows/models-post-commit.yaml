@@ -57,19 +57,23 @@ jobs:
       - cloud-virtual-machine
     steps:
       - uses: tenstorrent-metal/metal-workflows/.github/actions/checkout-with-submodule-lfs@v2.0.0
-      - name: Set up dynamic env vars for build
-        run: |
-          echo "TT_METAL_HOME=$(pwd)" >> $GITHUB_ENV
-      - uses: ./.github/actions/prepare-metal-run
+      - name: ${{ matrix.test-group.name }} tests
+        timeout-minutes: 120
+        uses: ./.github/actions/docker-run
         with:
-          arch: ${{ inputs.arch }}
-      - name: ${{ inputs.runner-label }} tests
-        timeout-minutes: ${{ inputs.timeout }}
-        run: |
-          source ${{ github.workspace }}/python_env/bin/activate
-          cd $TT_METAL_HOME
-          export PYTHONPATH=$TT_METAL_HOME
-          ${{ matrix.test-group.cmd }}
+          docker_username: ${{ github.actor }}
+          docker_password: ${{ secrets.GITHUB_TOKEN }}
+          docker_image_arch: ${{ inputs.arch }}
+          docker_opts: |
+            -e ARCH_NAME=${{ inputs.arch }}
+            -e LOGURU_LEVEL=${{ env.LOGURU_LEVEL }}
+            -e PYTHONPATH=/app/mtl
+            -v /dev/hugepages-1G:/dev/hugepages-1G
+            --device /dev/tenstorrent
+          run_args: |
+            cd /app/mtl
+            rm -rf tt_metal tt_eager
+            ${{ matrix.test-group.cmd }}
       - uses: ./.github/actions/slack-report
         if: ${{ failure() }}
         with:

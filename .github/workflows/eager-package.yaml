@@ -16,6 +16,7 @@ on:
 jobs:
   build-eager-package:
     runs-on: ${{ inputs.os }}
+    # TODO: Switch to self-hosted runners, build machines
     environment: ${{ inputs.environment }}
     env:
       TT_METAL_ENV: ${{ vars.TT_METAL_ENV }}
@@ -50,6 +51,7 @@ jobs:
         if: ${{ inputs.os == 'ubuntu-22.04' }}
         run: |
           echo "DEVICE_CXX=g++" >> $GITHUB_ENV
+        # TODO: How do we leverage C++ artifact that was built in the previous step
       - name: Build Python package distribution
         run: python -m build
       - name: Upload distribution as artifact
