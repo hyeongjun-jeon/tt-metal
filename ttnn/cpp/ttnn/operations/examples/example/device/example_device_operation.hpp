@@ -52,11 +52,13 @@ struct ExampleDeviceOperation {
 
     // Define the return types for the shape(s) of the operation
     // Can be a single ttnn::Shape, std::optional<ttnn::Shape>, std::vector<ttnn::Shape>, std::tuple<ttnn::Shape> etc.
-    using shape_return_value_t = ttnn::Shape;
+    using shape_return_value_t = std::tuple<std::optional<ttnn::Shape>, std::optional<ttnn::Shape>>;
 
     // Define the return types for the tensor(s) of the operation
     // Can be a single Tensor, std::optional<Tensor, ...>, std::vector<Tensor>, std::tuple<Tensor, ...> etc.
-    using tensor_return_value_t = Tensor;
+    // using tensor_return_value_t = Tensor;
+    // using tensor_return_value_t = std::tuple<Tensor, Tensor>;
+    using tensor_return_value_t = std::tuple<std::optional<Tensor>, std::optional<Tensor>>;
 
     // Note shape_return_value_t and tensor_return_value_t should follow the same pattern
     // i.e. if shape_return_value_t is a std::vector<std::optional<ttnn::Shape>> then tensor_return_value_t should be
@@ -82,29 +84,7 @@ struct ExampleDeviceOperation {
             tensor_return_value_t& tensor_return_value);
     };
 
-    struct MultiCore {
-        // Shared variables are the variables that are shared between the create and override_runtime_arguments methods
-        struct shared_variables_t {
-            KernelHandle unary_reader_kernel_id;
-            KernelHandle unary_writer_kernel_id;
-            std::size_t num_cores;
-            std::size_t num_cores_y;
-        };
-        using cached_program_t = ttnn::device_operation::CachedProgram<shared_variables_t>;
-
-        static cached_program_t create(
-            const operation_attributes_t& operation_attributes,
-            const tensor_args_t& tensor_args,
-            tensor_return_value_t& tensor_return_value);
-
-        static void override_runtime_arguments(
-            cached_program_t& cached_program,
-            const operation_attributes_t& operation_attributes,
-            const tensor_args_t& tensor_args,
-            tensor_return_value_t& tensor_return_value);
-    };
-
-    using program_factory_t = std::variant<SingleCore, MultiCore>;
+    using program_factory_t = std::variant<SingleCore>;
 
     // Mandatory methods
 

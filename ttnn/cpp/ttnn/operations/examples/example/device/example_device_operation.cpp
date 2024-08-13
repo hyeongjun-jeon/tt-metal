@@ -8,11 +8,7 @@ namespace ttnn::operations::examples {
 
 ExampleDeviceOperation::program_factory_t ExampleDeviceOperation::select_program_factory(
     const operation_attributes_t& operation_attributes, const tensor_args_t& tensor_args) {
-    bool some_condition_based_on_operation_attributes_and_or_tensor_args = true;
-    if (some_condition_based_on_operation_attributes_and_or_tensor_args) {
-        return SingleCore{};
-    }
-    return MultiCore{};
+    return SingleCore{};
 }
 
 void ExampleDeviceOperation::validate_on_program_cache_miss(
@@ -23,18 +19,31 @@ void ExampleDeviceOperation::validate_on_program_cache_hit(
 
 ExampleDeviceOperation::shape_return_value_t ExampleDeviceOperation::compute_output_shapes(
     const operation_attributes_t&, const tensor_args_t& tensor_args) {
-    return tensor_args.input_tensor.tensor_attributes->shape;
+    return {tensor_args.input_tensor.tensor_attributes->shape, tensor_args.input_tensor.tensor_attributes->shape};
 }
 
 ExampleDeviceOperation::tensor_return_value_t ExampleDeviceOperation::create_output_tensors(
     const operation_attributes_t& operation_attributes, const tensor_args_t& tensor_args) {
-    auto output_shape = compute_output_shapes(operation_attributes, tensor_args);
+    auto [output1_shape_opt, output2_shape_opt] = compute_output_shapes(operation_attributes, tensor_args);
+
+    auto output1_shape = output1_shape_opt.value();
+    auto output2_shape = output2_shape_opt.value();
+
     const auto& input_tensor = tensor_args.input_tensor;
-    return create_device_tensor(
-        output_shape,
+    auto output1 = create_device_tensor(
+        output1_shape,
         input_tensor.tensor_attributes->dtype,
         input_tensor.tensor_attributes->layout,
         input_tensor.device());
+
+    auto output2 = create_device_tensor(
+        output2_shape,
+        input_tensor.tensor_attributes->dtype,
+        input_tensor.tensor_attributes->layout,
+        input_tensor.device());
+
+    // return {output1, output2};
+    return {output1, std::nullopt};
 }
 
 

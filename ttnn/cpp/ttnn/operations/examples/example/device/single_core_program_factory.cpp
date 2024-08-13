@@ -14,7 +14,15 @@ ExampleDeviceOperation::SingleCore::cached_program_t ExampleDeviceOperation::Sin
     using namespace tt::tt_metal;
 
     const auto& input_tensor = tensor_args.input_tensor;
-    auto& output_tensor = tensor_return_value;
+    // auto [output_tensor, output2] = tensor_return_value;
+    auto [output_tensor_opt, output2_opt] = tensor_return_value;
+
+    auto output_tensor = output_tensor_opt.value();
+
+    Tensor output2;
+    if (output2_opt.has_value()) {
+        output2 = output2_opt.value();
+    }
 
     auto src_buffer = input_tensor.buffer();
     auto dst_buffer = output_tensor.buffer();
@@ -133,7 +141,12 @@ void ExampleDeviceOperation::SingleCore::override_runtime_arguments(
     auto& unary_writer_kernel_id = cached_program.shared_variables.unary_writer_kernel_id;
 
     const auto& input_tensor = tensor_args.input_tensor;
-    auto& output_tensor = tensor_return_value;
+    // auto& output_tensor = tensor_return_value;
+
+    // auto [output_tensor, output2] = tensor_return_value;
+    auto [output_tensor_opt, output2_opt] = tensor_return_value;
+
+    auto output_tensor = output_tensor_opt.value();
 
     auto src_buffer = input_tensor.buffer();
     auto dst_buffer = output_tensor.buffer();
@@ -146,6 +159,10 @@ void ExampleDeviceOperation::SingleCore::override_runtime_arguments(
     {
         auto& runtime_args = tt::tt_metal::GetRuntimeArgs(program, unary_writer_kernel_id, CoreCoord{0, 0});
         runtime_args[0] = dst_buffer->address();
+        if (output2_opt.has_value()) {
+            // do something
+            auto output2 = output2_opt.value();
+        }
     }
 }
 
