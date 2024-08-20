@@ -142,7 +142,7 @@ struct dispatch_constants {
 inline uint32_t get_relative_cq_offset(uint8_t cq_id, uint32_t cq_size) { return cq_id * cq_size; }
 
 inline uint16_t get_umd_channel(uint16_t channel) {
-    return channel & 0x3;
+    return channel & 0x7;
 }
 
 /// @brief Get absolute offset of the command queue

@@ -223,6 +223,9 @@ void Cluster::assign_mem_channels_to_devices(
     // One WH gateway should have 8 remote deivces in its control group.
     TT_ASSERT(controlled_device_ids.size() <= 9, "Unable to assign each device to its own host memory channel!");
     uint16_t channel = 0;
+    if (mmio_device_id > 3) {
+        channel = 16;
+    }
     this->device_to_host_mem_channel_[mmio_device_id] = channel++;
     for (const chip_id_t &device_id : controlled_device_ids) {
         if (device_id == mmio_device_id) {
@@ -304,7 +307,16 @@ void Cluster::start_driver(chip_id_t mmio_device_id, tt_device_params &device_pa
 
 Cluster::~Cluster() {
     log_info(tt::LogDevice, "Closing user mode device drivers");
+    std::cout << " mmio_device " << 0 << std::endl;
+    this->mmio_device_id_to_driver_.at(0)->close_device();
+    std::cout << " mmio_device " << 1 << std::endl;
+    this->mmio_device_id_to_driver_.at(1)->close_device();
+    std::cout << " mmio_device " << 2 << std::endl;
+    this->mmio_device_id_to_driver_.at(2)->close_device();
+    std::cout << " mmio_device " << 3 << std::endl;
+    this->mmio_device_id_to_driver_.at(3)->close_device();
     for (const auto &[mmio_device_id, device_driver] : this->mmio_device_id_to_driver_) {
+      std::cout << " mmio_device " << mmio_device_id << std::endl;
         device_driver->close_device();
     }
 
