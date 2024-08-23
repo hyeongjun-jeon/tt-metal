@@ -13,14 +13,16 @@ using ttnn::ccl::coord_t;
 
 template <bool is_line>
 struct reader_signaler {
+    bool enabled;
     uint64_t noc_semaphore_address;
 
     FORCE_INLINE static reader_signaler build(std::size_t &arg_idx) {
         if constexpr (is_line) {
+            bool signal_reader_on_output_tensor_write = get_arg_val<uint32_t>(arg_idx++) != 0;
             uint32_t noc_x = get_arg_val<uint32_t>(arg_idx++);
             uint32_t noc_y = get_arg_val<uint32_t>(arg_idx++);
             uint32_t addr = get_arg_val<uint32_t>(arg_idx++);
-            return {get_noc_addr(noc_x,noc_y,addr)};
+            return {signal_reader_on_output_tensor_write, get_noc_addr(noc_x,noc_y,addr)};
         } else {
             return {0};
         }
@@ -28,7 +30,7 @@ struct reader_signaler {
 
     FORCE_INLINE std::size_t get_args_consumed() const {
         if constexpr (is_line) {
-            return 3;
+            return 4;
         } else {
             return 0;
         }
@@ -36,8 +38,10 @@ struct reader_signaler {
 
     FORCE_INLINE void notify() const {
         if constexpr (is_line) {
-            DPRINT << "SIGNALLER NOTIFYING RECEIVER (SHOULDNT HAPPEN FOR RING)\n";
-            noc_semaphore_inc(noc_semaphore_address, 1);
+            if (enabled) {
+                DPRINT << "SIGNALLER NOTIFYING RECEIVER (SHOULDNT HAPPEN FOR RING)\n";
+                noc_semaphore_inc(noc_semaphore_address, 1);
+            }
         }
     }
 
@@ -55,7 +59,7 @@ void kernel_main() {
      * Indicates to another reader core that we have written out a unit of data to the output tensor and
      * that unit of data can be readback for accumulation with the outputs from the opposite line directoin
      */
-    constexpr bool signal_reader_on_output_tensor_write = get_compile_time_arg_val(5) != 0;
+    constexpr bool signal_reader_on_output_tensor_write = get_compile_time_arg_val(4) != 0;
 
     #ifdef SHARDED_MEM_LAYOUT
     constexpr uint32_t output_tensor_shard_grid_height = get_compile_time_arg_val(5);
@@ -178,7 +182,7 @@ void kernel_main() {
 
         ASSERT(total_lifetime_cb_pages_popped_from_math + num_pages_to_write <= total_eltwise_kernel_num_pages);
         for (uint32_t i = 0; i < num_transfers; ++i) {
-            const uint32_t cb_in = ((i == 0) && !signal_reader_on_output_tensor_write) ? cb_id_in_short_circuit : cb_id_in0;
+            const uint32_t cb_in = ((i == 0) /*&& !signal_reader_on_output_tensor_write*/) ? cb_id_in_short_circuit : cb_id_in0;
             DPRINT << "S NEW TRANSFER\n";
 
             for (uint32_t p = 0; p < num_pages_to_write; p += full_chunk_num_pages) {

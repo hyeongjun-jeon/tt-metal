@@ -17,14 +17,13 @@ args_list_t emit_runtime_args(WorkerEdmInterfaceArgs const& edm_interface_args) 
         edm_interface_args.edm_noc_x,
         edm_interface_args.edm_noc_x,
         reinterpret_cast<uint32_t>(edm_interface_args.edm_buffer_base_address),
-        reinterpret_cast<uint32_t>(edm_interface_args.edm_semaphore_address)
+        reinterpret_cast<uint32_t>(edm_interface_args.edm_semaphore_address),
+        edm_interface_args.num_buffers_per_channel
     };
 }
 
 args_list_t emit_compile_time(WorkerEdmInterfaceArgs const& edm_interface_args) {
-    return {
-        edm_interface_args.num_buffers_per_channel
-    };
+    return {};
 }
 
 
@@ -39,9 +38,10 @@ args_list_t emit_address_generator_runtime_args(tt::tt_metal::Device const* cons
 
         case tt::tt_metal::TensorMemoryLayout::INTERLEAVED:
             TT_ASSERT(t.buffer()->page_size() != 1024);
+            // For now we won't emit these args... assume these are passed in elsewhere
             return {
-                static_cast<uint32_t>(t.buffer()->address()),
-                static_cast<uint32_t>(t.buffer()->page_size())
+                // static_cast<uint32_t>(t.buffer()->address()),
+                // static_cast<uint32_t>(t.buffer()->page_size())
             };
 
         break;
@@ -124,8 +124,8 @@ std::vector<uint32_t> ShardedAddrGenArgBuilder::emit_ct_args(Tensor const& t) {
     TT_FATAL(
         t.memory_config().memory_layout == TensorMemoryLayout::BLOCK_SHARDED ||
         t.memory_config().memory_layout == TensorMemoryLayout::HEIGHT_SHARDED ||
-        t.memory_config().memory_layout == TensorMemoryLayout::WIDTH_SHARDED
-    );
+        t.memory_config().memory_layout == TensorMemoryLayout::WIDTH_SHARDED,
+    "ShardedAddrGenArgBuilder::emit_ct_args was invoked with a tensor containing an unsupported (Sharded) Tensor Memory Layout: {}", t.memory_config().memory_layout);
     // shard_grid_height (cores)
     args.push_back(shard_grid_end.y - shard_grid_start.y + 1);
     // shard_grid_width (cores)
@@ -148,8 +148,8 @@ bool ShardedAddrGenArgBuilder::shard_grid_is_transposed(Tensor const& t) {
     TT_FATAL(
         t.memory_config().memory_layout == TensorMemoryLayout::BLOCK_SHARDED ||
         t.memory_config().memory_layout == TensorMemoryLayout::HEIGHT_SHARDED ||
-        t.memory_config().memory_layout == TensorMemoryLayout::WIDTH_SHARDED
-    );
+        t.memory_config().memory_layout == TensorMemoryLayout::WIDTH_SHARDED,
+    "ShardedAddrGenArgBuilder::emit_ct_args was invoked with a tensor containing an unsupported (Sharded) Tensor Memory Layout: {}", t.memory_config().memory_layout);
     bool shard_grid_transposed =
         ((t.memory_config().memory_layout == TensorMemoryLayout::HEIGHT_SHARDED &&
           t.shard_spec()->orientation == ShardOrientation::ROW_MAJOR) ||
