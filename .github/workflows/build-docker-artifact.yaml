@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - dimitri/8082-use-containers-rebased # Needs to be changed before the merge
+      - dimitri/8082-run-python-tests-on-wheel # Needs to be changed before the merge
     paths:
       - dockerfile/ubuntu-20.04-amd64.Dockerfile
+      - scripts/docker/requirements*
       # Add requirements.txt, project.toml
 jobs:
   build-docker-image:
