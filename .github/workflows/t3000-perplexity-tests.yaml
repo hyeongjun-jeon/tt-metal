@@ -6,7 +6,12 @@ on:
     - cron: "0 12 * * 6" # This cron schedule runs the workflow every saturday at 12pm
 
 jobs:
+  build-docker-image:
+    uses: ./.github/workflows/build-docker-artifact.yaml
+    secrets: inherit
+
   build-artifact:
+    needs: build-docker-image
     uses: ./.github/workflows/build-artifact.yaml
     with:
       arch: '["wormhole_b0"]'

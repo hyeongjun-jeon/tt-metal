@@ -1,16 +1,31 @@
 name: "Build tt-metal docker artifact"
 
 on:
+  workflow_call:
+    inputs:
+      os:
+        required: false
+        type: string
+        default: "ubuntu-20.04-amd64"
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - dockerfile/ubuntu-20.04-amd64.Dockerfile
-      - scripts/docker/requirements*
-      - pyproject.toml
-      - scripts/docker/install_test_deps.sh
-      - tt_metal/python_env/requirements-dev.txt
+    inputs:
+      os:
+        required: false
+        type: choice
+        default: "ubuntu-20.04-amd64"
+        options:
+            - "ubuntu-20.04-amd64"
+            - "ubuntu-22.04-amd64"
+    push:
+      branches:
+        - main
+      paths:
+        - dockerfile/ubuntu-20.04-amd64.Dockerfile
+        - scripts/docker/requirements*
+        - pyproject.toml
+        - scripts/docker/install_test_deps.sh
+        - tt_metal/python_env/requirements-dev.txt
+
 jobs:
   build-docker-image:
     env:
@@ -18,6 +33,8 @@ jobs:
       CONFIG: ci
       SILENT: 0
       VERBOSE: 1
+      TT_METAL_DOCKER_IMAGE: tt-metalium/${{ inputs.os}}
+      INPUT_IMAGE_TAG: ${{ github.ref_name }}
       IMAGE: tt-metalium/ubuntu-20.04-amd64
       DOCKERFILE: ubuntu-20.04-amd64
     environment: dev
@@ -32,6 +49,9 @@ jobs:
           registry: https://ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Docker image
+        run: |
+          ./scripts/docker/build_docker_image.sh ${{ inputs.os }}
       - name: Determine Docker Image Tag
         id: set-image
         run: |
