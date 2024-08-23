@@ -187,7 +187,7 @@ struct ExecuteBinaryRemainder
 
 struct ExecuteGCD
 {
-    static Tensor operator()(
+    static Tensor invoke(
         const Tensor& input_tensor_a,
         const Tensor& input_tensor_b,
         const std::optional<MemoryConfig>& memory_config = std::nullopt);
@@ -195,7 +195,7 @@ struct ExecuteGCD
 
 struct ExecuteLCM
 {
-    static Tensor operator()(
+    static Tensor invoke(
         const Tensor& input_tensor_a,
         const Tensor& input_tensor_b,
         const std::optional<MemoryConfig>& memory_config = std::nullopt);
