@@ -1,4 +1,4 @@
-name: "Build tt-metal artifacts"
+name: "Build Docker Release Image artifact"
 
 on:
   workflow_call:
