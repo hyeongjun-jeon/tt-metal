@@ -44,6 +44,6 @@ jobs:
           fi
       - name: Push Docker image to GitHub Container Registry
         run: |
-          GITHUB_REPO_DOCKER_IMAGE_TAG=ghcr.io/${{ github.repository }}/${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
+          GITHUB_REPO_DOCKER_IMAGE_TAG=ghcr.io/${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
           docker tag ${{ env.IMAGE }}:${{ env.IMAGE_TAG }} $GITHUB_REPO_DOCKER_IMAGE_TAG
           docker push $GITHUB_REPO_DOCKER_IMAGE_TAG
