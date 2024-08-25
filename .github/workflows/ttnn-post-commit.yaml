@@ -84,15 +84,7 @@ jobs:
           docker_username: ${{ github.actor }}
           docker_password: ${{ secrets.GITHUB_TOKEN }}
           docker_image_arch: ${{ inputs.arch }}
-          docker_opts: |
-            -e ARCH_NAME=${{ inputs.arch }}
-            -e LOGURU_LEVEL=${{ env.LOGURU_LEVEL }}
-            -e PYTHONPATH=/app/mtl
-            -v /dev/hugepages-1G:/dev/hugepages-1G
-            --device /dev/tenstorrent
           run_args: |
-            cd /app/mtl
-            rm -rf tt_metal tt_eager
             ${{ matrix.test-group.cmd }}
       - uses: ./.github/actions/slack-report
         if: ${{ failure() }}
