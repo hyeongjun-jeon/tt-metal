@@ -19,6 +19,7 @@ jobs:
     secrets: inherit
 # TODO: pass the C++ artifact to the wheel build
   build-wheels:
+    needs: build-artifact
     uses: ./.github/workflows/eager-package-main.yaml
     secrets: inherit
   build-docker-with-wheels-artifact:
