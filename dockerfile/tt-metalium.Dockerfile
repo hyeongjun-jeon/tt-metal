@@ -20,11 +20,6 @@ ENV WHEEL_FILENAME=${WHEEL_FILENAME}
 
 COPY $WHEEL_FILENAME /usr/app/
 
-#RUN VERSION_NO_DASH=$(echo "$VERSION" | sed 's/-//g') && wget https://github.com/tenstorrent/tt-metal/releases/download/v${VERSION}/metal_libs-${VERSION_NO_DASH}+${ARCH_NAME_IN_URL}-cp38-cp38-linux_x86_64.whl
-
 RUN pip3 install $WHEEL_FILENAME 
-# metal_libs-${VERSION_NO_DASH}+${ARCH_NAME_IN_URL}-cp38-cp38-linux_x86_64.whl
-
-#RUN chown python:python -R /usr/local/lib/python3.8/dist-packages/
 
 CMD ["tail", "-f", "/dev/null"]
