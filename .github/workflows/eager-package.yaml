@@ -16,7 +16,6 @@ on:
 jobs:
   build-eager-package:
     runs-on: ${{ inputs.os }}
-    # TODO: Switch to self-hosted runners, build machines
     environment: ${{ inputs.environment }}
     env:
       TT_METAL_ENV: ${{ vars.TT_METAL_ENV }}
