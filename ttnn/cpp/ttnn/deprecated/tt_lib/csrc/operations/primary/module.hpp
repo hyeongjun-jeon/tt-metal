@@ -486,9 +486,9 @@ void py_module(py::module& m_primary) {
         py::arg("output").noconvert() = std::nullopt,
         py::arg("mean").noconvert() = std::nullopt,
         py::arg("rstd").noconvert() = std::nullopt,
-        py::arg("output_mem_config").noconvert() = operation::DEFAULT_OUTPUT_MEMORY_CONFIG,
-        py::arg("mean_mem_config").noconvert() = operation::DEFAULT_OUTPUT_MEMORY_CONFIG,
-        py::arg("rstd_mem_config").noconvert() = operation::DEFAULT_OUTPUT_MEMORY_CONFIG,
+        py::arg("output_memory_config").noconvert() = std::nullopt,
+        py::arg("mean_memory_config").noconvert() = std::nullopt,
+        py::arg("rstd_memory_config").noconvert() = std::nullopt,
         R"doc(
         Performs a moreh_groupnorm operation.
     )doc");

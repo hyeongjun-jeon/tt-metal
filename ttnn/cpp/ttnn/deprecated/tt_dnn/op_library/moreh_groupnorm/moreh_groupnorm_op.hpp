@@ -13,6 +13,7 @@
 #include "ttnn/run_operation.hpp"
 #include "ttnn/tensor/tensor.hpp"
 #include "ttnn/tensor/tensor_impl.hpp"
+#include "ttnn/deprecated/tt_dnn/op_library/compute_kernel_config.hpp"
 
 namespace tt {
 
@@ -26,9 +27,9 @@ struct MorehGroupNorm {
     uint32_t num_groups;
     float eps;
     std::vector<bool> are_required_outputs;
-    MemoryConfig output_mem_config;
-    MemoryConfig mean_mem_config;
-    MemoryConfig rstd_mem_config;
+    MemoryConfig output_memory_config;
+    MemoryConfig mean_memory_config;
+    MemoryConfig rstd_memory_config;
 
     void validate_with_output_tensors(
         const std::vector<Tensor> &input_tensors,
@@ -66,9 +67,9 @@ std::vector<std::optional<Tensor>> moreh_groupnorm(
     const std::optional<const Tensor> output = std::nullopt,
     const std::optional<const Tensor> mean = std::nullopt,
     const std::optional<const Tensor> rstd = std::nullopt,
-    const MemoryConfig &output_mem_config = operation::DEFAULT_OUTPUT_MEMORY_CONFIG,
-    const MemoryConfig &mean_mem_config = operation::DEFAULT_OUTPUT_MEMORY_CONFIG,
-    const MemoryConfig &rstd_mem_config = operation::DEFAULT_OUTPUT_MEMORY_CONFIG);
+    const std::optional<const MemoryConfig> output_memory_config = std::nullopt,
+    const std::optional<const MemoryConfig> mean_memory_config = std::nullopt,
+    const std::optional<const MemoryConfig> rstd_memory_config = std::nullopt);
 
 }  // namespace primary
 

@@ -9,14 +9,14 @@
 #include <utility>
 #include <vector>
 
-#include "ttnn/run_operation.hpp"
-#include "ttnn/tensor/tensor.hpp"
-#include "ttnn/tensor/tensor_impl.hpp"
+#include "tt_metal/detail/util.hpp"
+#include "tt_metal/host_api.hpp"
 #include "ttnn/deprecated/tt_dnn/op_library/moreh_groupnorm/moreh_groupnorm_op.hpp"
 #include "ttnn/deprecated/tt_dnn/op_library/moreh_helper_functions.hpp"
 #include "ttnn/deprecated/tt_dnn/op_library/work_split.hpp"
-#include "tt_metal/detail/util.hpp"
-#include "tt_metal/host_api.hpp"
+#include "ttnn/run_operation.hpp"
+#include "ttnn/tensor/tensor.hpp"
+#include "ttnn/tensor/tensor_impl.hpp"
 
 namespace tt {
 
@@ -95,9 +95,9 @@ operation::ProgramWithCallbacks moreh_groupnorm_impl(
     const bool mean_has_value = mean.has_value();
     const bool rstd_has_value = rstd.has_value();
 
-    constexpr uint32_t MAX_BLOCK_SIZE = 8;
     const uint32_t block_size = get_block_size(num_inner_tiles, MAX_BLOCK_SIZE);
 
+    std::cout << "HHHHHHHHHHHHHHH HOST block_size " << block_size << "\n";
     ////////////////////////////////////////////////////////////////////////////
     //                         Core Setup
     ////////////////////////////////////////////////////////////////////////////
@@ -120,77 +120,36 @@ operation::ProgramWithCallbacks moreh_groupnorm_impl(
     ////////////////////////////////////////////////////////////////////////////
     //                         CircularBuffer Setup
     ////////////////////////////////////////////////////////////////////////////
-    uint32_t in0_t = num_inner_tiles;                         // input
-    const uint32_t in1_t = 1;                                 // scaler
-    const uint32_t in2_t = 1;                                 // epsilon
-    const uint32_t in3_t = gamma_has_value ? block_size : 0;  // gamma
-    const uint32_t in4_t = beta_has_value ? block_size : 0;   // beta
-    const uint32_t in5_t = do_mask_h ? 1 : 0;                 // mask_h
-    const uint32_t in6_t = do_mask_w ? 1 : 0;                 // mask_w
+    uint32_t in0_t = num_inner_tiles;  // input
+    const uint32_t in6_t = 1;          // mask_w
 
-    const uint32_t out0_t = block_size;              // output
-    const uint32_t out1_t = mean_has_value ? 1 : 0;  // mean
-    const uint32_t out2_t = rstd_has_value ? 1 : 0;  // rstd
-
-    const uint32_t im0_t = 1;                                                         // E[x]
-    uint32_t im1_t = num_inner_tiles;                                                 // x - E[x]
-    uint32_t im2_t = 1;                                                               // (x - E[x])^2
-    const uint32_t im3_t = 1;                                                         // Sum[(x - E[x])^2]
-    const uint32_t im4_t = 1;                                                         // E[(x - E[x])^2] = Var[x]
-    const uint32_t im5_t = 1;                                                         // 1.0/(sqrt(Var[x] + eps))
-    const uint32_t im6_t = (gamma_has_value || beta_has_value) ? 2 * block_size : 0;  // x * gamm + beta
-    const uint32_t im7_t = 2;                                                         // Sum[x]
+    uint32_t im1_t = num_inner_tiles;  // x - E[x]
+    uint32_t im2_t = 1;                // (x - E[x])^2
 
     const auto cb_data_format = tt_metal::datatype_to_dataformat_converter(input.get_dtype());
     const auto single_tile_size = tt_metal::detail::TileSize(cb_data_format);
 
-    const auto cb_usage = (in0_t + in1_t + in2_t + in3_t + in4_t + in5_t + in6_t + out0_t + out1_t + out2_t + im0_t +
-                           im1_t + im2_t + im3_t + im4_t + im5_t + im6_t + im7_t) *
-                          single_tile_size;
-    const auto available_L1 = device->l1_size_per_core() - L1_UNRESERVED_BASE;
-    const bool use_large_algorithm = cb_usage >= available_L1;
+    bool use_large_algorithm = false;
 
-    if (use_large_algorithm) {
-        log_info(LogTest, "Large moreh_groupnorm algorithm is selected.");
-        in0_t = block_size;
-        im1_t = 2 * block_size;
-        im2_t = 2 * block_size;
-    } else {
-        log_info(LogTest, "Small moreh_groupnorm algorithm is selected.");
-    }
-
+    std::cout << "HHHHHHHHHHHHHHH HOST num_inner_tiles " << num_inner_tiles << "\n";
     CreateCircularBuffer(
         program,
         all_cores,
         cb_data_format,
         {
-            {CB::c_in0, in0_t},        // input
-            {CB::c_in1, in1_t},        // scaler
-            {CB::c_in2, in2_t},        // eps
-            {CB::c_in3, in3_t},        // gamma
-            {CB::c_in4, in4_t},        // beta
-            {CB::c_in5, in5_t},        // mask_h
-            {CB::c_in6, in6_t},        // mask_w
-            {CB::c_out0, out0_t},      // output
-            {CB::c_out1, out1_t},      // mean
-            {CB::c_out2, out2_t},      // rstd
-            {CB::c_intermed0, im0_t},  // E[x]
-            {CB::c_intermed1, im1_t},  // x - E[x]
-            {CB::c_intermed2, im2_t},  // (x - E[x])^2
-            {CB::c_intermed3, im3_t},  // Sum[(x - E[x])^2]
-            {CB::c_intermed4, im4_t},  // E[(x - E[x])^2] = Var[x]
-            {CB::c_intermed5, im5_t},  // 1.0/(sqrt(Var[x] + eps))
-            {CB::c_intermed6, im6_t},  // y * gamm + beta
-            {CB::c_intermed7, im7_t},  // Sum[x]
+            {CB::c_in0, in0_t},  // input
+            {CB::c_in6, in6_t},
+            {CB::c_intermed1, im1_t},
+            {CB::c_intermed2, im2_t},
         });
 
     ////////////////////////////////////////////////////////////////////////////
     //                      DataMovementKernel SetUp
     ////////////////////////////////////////////////////////////////////////////
-    const auto reader_kernel_file =
-        use_large_algorithm
-            ? "ttnn/cpp/ttnn/deprecated/tt_dnn/op_library/moreh_groupnorm/kernels/dataflow/reader_moreh_groupnorm_large.cpp"
-            : "ttnn/cpp/ttnn/deprecated/tt_dnn/op_library/moreh_groupnorm/kernels/dataflow/reader_moreh_groupnorm_small.cpp";
+    const auto reader_kernel_file = use_large_algorithm ? "ttnn/cpp/ttnn/deprecated/tt_dnn/op_library/moreh_groupnorm/"
+                                                          "kernels/dataflow/reader_moreh_groupnorm_large.cpp"
+                                                        : "ttnn/cpp/ttnn/deprecated/tt_dnn/op_library/moreh_groupnorm/"
+                                                          "kernels/dataflow/reader_moreh_groupnorm_small.cpp";
 
     const std::string writer_kernel_file(
         "ttnn/cpp/ttnn/deprecated/tt_dnn/op_library/moreh_groupnorm/kernels/dataflow/writer_moreh_groupnorm.cpp");
@@ -206,8 +165,9 @@ operation::ProgramWithCallbacks moreh_groupnorm_impl(
     compute_defines["REDUCE_DIM"] = "ReduceDim::REDUCE_SCALAR";
 
     const auto compute_kernel_file =
-        use_large_algorithm ? "ttnn/cpp/ttnn/deprecated/tt_dnn/op_library/moreh_layernorm/kernels/moreh_layernorm_large_kernel.cpp"
-                            : "ttnn/cpp/ttnn/deprecated/tt_dnn/op_library/moreh_layernorm/kernels/moreh_layernorm_small_kernel.cpp";
+        use_large_algorithm
+            ? "ttnn/cpp/ttnn/deprecated/tt_dnn/op_library/moreh_layernorm/kernels/moreh_layernorm_large_kernel.cpp"
+            : "ttnn/cpp/ttnn/deprecated/tt_dnn/op_library/moreh_layernorm/kernels/moreh_layernorm_small_kernel.cpp";
 
     const std::vector<uint32_t> compute_args_group_1{
         num_rows_per_core_group_1,

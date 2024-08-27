@@ -104,21 +104,21 @@ std::vector<Tensor> MorehGroupNorm::create_output_tensors(
     if (output_tensors.at(0).has_value()) {
         result.push_back(output_tensors.at(0).value());
     } else {
-        result.push_back(create_device_tensor(output_shapes.at(0), dtype, layout, device, this->output_mem_config));
+        result.push_back(create_device_tensor(output_shapes.at(0), dtype, layout, device, this->output_memory_config));
     }
 
     // mean
     if (output_tensors.at(1).has_value()) {
         result.push_back(output_tensors.at(1).value());
     } else if (this->are_required_outputs.at(1)) {
-        result.push_back(create_device_tensor(output_shapes.at(1), dtype, layout, device, this->mean_mem_config));
+        result.push_back(create_device_tensor(output_shapes.at(1), dtype, layout, device, this->mean_memory_config));
     }
 
     // rstd
     if (output_tensors.at(2).has_value()) {
         result.push_back(output_tensors.at(2).value());
     } else if (this->are_required_outputs.at(2)) {
-        result.push_back(create_device_tensor(output_shapes.at(2), dtype, layout, device, this->rstd_mem_config));
+        result.push_back(create_device_tensor(output_shapes.at(2), dtype, layout, device, this->rstd_memory_config));
     }
 
     return std::move(result);
@@ -162,9 +162,9 @@ std::vector<std::optional<Tensor>> moreh_groupnorm(
     const std::optional<const Tensor> output,
     const std::optional<const Tensor> mean,
     const std::optional<const Tensor> rstd,
-    const MemoryConfig &output_mem_config,
-    const MemoryConfig &mean_mem_config,
-    const MemoryConfig &rstd_mem_config) {
+    const std::optional<const MemoryConfig> output_memory_config,
+    const std::optional<const MemoryConfig> mean_memory_config,
+    const std::optional<const MemoryConfig> rstd_memory_config) {
     TT_ASSERT(are_required_outputs.at(0) == true, "output is always required.");
 
     std::vector<Tensor> output_tensors = {
@@ -173,18 +173,18 @@ std::vector<std::optional<Tensor>> moreh_groupnorm(
         Tensor(operation::get_workers_for_op_output({input}, {gamma, beta}))};
 
     operation::launch_op(
-        [num_groups, eps, are_required_outputs, output_mem_config, mean_mem_config, rstd_mem_config](
+        [num_groups, are_required_outputs, output_memory_config, mean_memory_config, rstd_memory_config](
             const std::vector<Tensor> &input_tensors,
             const std::vector<std::optional<const Tensor>> &optional_input_tensors,
             const std::vector<std::optional<Tensor>> &optional_output_tensors) mutable -> std::vector<Tensor> {
             return operation::run(
                 MorehGroupNorm{
                     .num_groups = num_groups,
-                    .eps = eps,
                     .are_required_outputs = std::move(are_required_outputs),
-                    .output_mem_config = std::move(output_mem_config),
-                    .mean_mem_config = std::move(mean_mem_config),
-                    .rstd_mem_config = std::move(rstd_mem_config)},
+                    .output_memory_config = output_memory_config.value_or(input_tensors.at(0).memory_config()),
+                    .mean_memory_config = mean_memory_config.value_or(input_tensors.at(0).memory_config()),
+                    .rstd_memory_config = rstd_memory_config.value_or(input_tensors.at(0).memory_config())
+                    },
                 input_tensors,
                 optional_input_tensors,
                 optional_output_tensors);
