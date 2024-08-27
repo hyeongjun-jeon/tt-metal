@@ -72,8 +72,6 @@ jobs:
       - name: Build Docker image
         run: |
           ARCH_NAME=${{ matrix.arch}}
-          # Do we not have to unzip? 
-          # unzip eager-dist-${{ matrix.os }}-${{ matrix.arch }}.zip
           WHEEL_FILENAME=$(ls -1 *.whl)
           echo $WHEEL_FILENAME
           docker build -f dockerfile/tt-metalium.Dockerfile -t ${{ env.TT_METAL_DOCKER_IMAGE_TAG }}-${{ matrix.arch }} . --build-arg="WHEEL_FILENAME=${WHEEL_FILENAME}" --build-arg="IMAGE_TAG=dev-${GITHUB_ACTOR}"
