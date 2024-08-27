@@ -22,7 +22,7 @@ class TestLevel(Enum):
 
 CONV_TB = {
     # activation - [[N,C,H,W]]
-    "activation_shapes":[
+    "activation_shapes": [
         [1, 32, 5, 5],
         [1, 64, 5, 5],
         [1, 64, 6, 6],
@@ -48,7 +48,7 @@ CONV_TB = {
     # stride = [stride_h, stride_w]
     "strides": [[1, 1], [2, 2]],
     # padding = [[pad_h, pad_w]]
-    "paddings": [[0, 0], [1, 1], [3, 3]]
+    "paddings": [[0, 0], [1, 1], [3, 3]],
 }
 
 
