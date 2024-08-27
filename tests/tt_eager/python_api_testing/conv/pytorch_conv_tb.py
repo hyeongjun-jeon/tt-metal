@@ -16,13 +16,13 @@ class TestLevel(Enum):
     OP_PROGRAM_CREATE = 3
     OP_FULL_COMPUTE = 4
 
+
 # Moved from conv_sweep_params.yaml
 # Remove when the issue is fixed https://github.com/tenstorrent/tt-metal/issues/11257
 
 CONV_TB = {
     # activation - [[N,C,H,W]]
-    "activation_shapes":
-    [
+    "activation_shapes":[
         [1, 32, 5, 5],
         [1, 64, 5, 5],
         [1, 64, 6, 6],
@@ -30,11 +30,10 @@ CONV_TB = {
         [1, 64, 8, 8],
         [1, 64, 9, 9],
         [1, 32, 10, 10],
-        [1, 64, 10, 10]
+        [1, 64, 10, 10],
     ],
     # kernel sizes - [[K,R,S]]
-    "kernel_sizes":
-    [
+    "kernel_sizes": [
         [32, 1, 1],
         [32, 3, 3],
         [32, 5, 5],
@@ -44,21 +43,12 @@ CONV_TB = {
         [64, 5, 5],
         [64, 7, 7],
         [128, 1, 1],
-        [128, 3, 3]
+        [128, 3, 3],
     ],
     # stride = [stride_h, stride_w]
-    "strides":
-    [
-        [1,1],
-        [2,2]
-    ],
+    "strides": [[1, 1], [2, 2]],
     # padding = [[pad_h, pad_w]]
-    "paddings":
-    [
-        [0,0],
-        [1,1],
-        [3,3]
-    ]
+    "paddings": [[0, 0], [1, 1], [3, 3]]
 }
 
 
@@ -97,8 +87,6 @@ def generate_pytorch_golden(conv_test_params):
     B = torch.randn(ctp.weight_shape, dtype=torch.bfloat16).float()
     C = torch.nn.functional.conv2d(A, B, stride=(ctp.stride_h, ctp.stride_w), padding=(ctp.pad_h, ctp.pad_w))
     return (A, B, C)
-
-
 
 
 def generate_conv_tb():
