@@ -6,7 +6,12 @@ on:
     - cron: "0 */8 * * *" # This cron schedule runs the workflow every 8 hours
 
 jobs:
+  build-docker-image:
+    uses: ./.github/workflows/build-docker-artifact.yaml
+    secrets: inherit
+
   build-artifact:
+    needs: build-docker-image
     uses: ./.github/workflows/build-artifact.yaml
     with:
       arch: '["wormhole_b0"]'
