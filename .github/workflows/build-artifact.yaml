@@ -1,4 +1,4 @@
-name: "Build tt-metal artifacts"
+name: "[internal] Build tt-metal artifacts impl"
 
 on:
   workflow_call:
@@ -47,13 +47,7 @@ on:
           - "ubuntu-20.04-amd64"
           - "ubuntu-22.04-amd64"
 jobs:
-  build-docker-image:
-    uses: ./.github/workflows/build-docker-artifact.yaml
-    with:
-      os: ${{ inputs.os }}
-
   build-artifact:
-    needs: build-docker-image
     strategy:
       matrix:
         arch: ${{ fromJson(inputs.arch || '["grayskull", "wormhole_b0", "blackhole"]') }}

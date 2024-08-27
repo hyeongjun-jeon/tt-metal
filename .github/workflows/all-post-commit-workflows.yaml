@@ -17,19 +17,26 @@ jobs:
   static-checks:
     uses: ./.github/workflows/all-static-checks.yaml
     secrets: inherit
+  build-docker-image-2004:
+    uses: ./.github/workflows/build-docker-artifact.yaml
+    secrets: inherit
+    with:
+      os: ubuntu-20.04-amd64
   build-artifact:
+    needs: build-docker-image-2004
     uses: ./.github/workflows/build-artifact.yaml
+    secrets: inherit
+  build-artifact-profiler:
+    needs: build-docker-image-2004
+    uses: ./.github/workflows/build-artifact.yaml
+    with:
+      tracy: true
     secrets: inherit
   build-docker-image-2204:
     uses: ./.github/workflows/build-docker-artifact.yaml
     secrets: inherit
     with:
       os: ubuntu-22.04-amd64
-  build-artifact-profiler:
-    uses: ./.github/workflows/build-artifact.yaml
-    with:
-      tracy: true
-    secrets: inherit
   # UMD Unit Tests
   umd-unit-tests:
     secrets: inherit
