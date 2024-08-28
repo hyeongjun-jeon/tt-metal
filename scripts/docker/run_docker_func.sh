@@ -11,14 +11,6 @@ fi
 
 function run_docker_common {
 
-    # Check if /dev/tenstorrent exists and add it to the docker run command if it does
-    local tt_device=""
-    if [[ -e /dev/tenstorrent ]]; then
-        tt_device="--device /dev/tenstorrent"
-    fi
-
-
-
     docker run \
         --rm \
         -v ${TT_METAL_HOME}:/${TT_METAL_HOME} \
@@ -27,7 +19,6 @@ function run_docker_common {
         -v /etc/group:/etc/group:ro \
         -v /etc/passwd:/etc/passwd:ro \
         -v /etc/shadow:/etc/shadow:ro \
-        -v /mnt/MLPerf:/mnt/MLPerf \
         -w ${TT_METAL_HOME} \
         -e TT_METAL_HOME=${TT_METAL_HOME} \
         -e LOGURU_LEVEL=${LOGURU_LEVEL} \
@@ -37,7 +28,6 @@ function run_docker_common {
         -e SILENT=${SILENT} \
 		    -e VERBOSE=${VERBOSE} \
         -u ${UID}:${GID} \
-        ${tt_device} \
         --net host \
         "$1" \
         "$2:latest" \
