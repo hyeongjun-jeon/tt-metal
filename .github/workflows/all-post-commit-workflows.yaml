@@ -21,10 +21,6 @@ jobs:
     needs: build-artifact
     uses: ./.github/workflows/eager-package-main.yaml
     secrets: inherit
-  build-docker-with-wheels-artifact:
-    needs: build-wheels
-    uses: ./.github/workflows/build-docker-with-wheels-artifact.yaml
-    secrets: inherit
   build-artifact:
     uses: ./.github/workflows/build-artifact.yaml
     secrets: inherit
@@ -66,7 +62,7 @@ jobs:
       runner-label: ${{ matrix.test-group.runner-label }}
   # Fast Dispatch Unit Tests
   fast-dispatch-unit-tests:
-    needs: build-docker-with-wheels-artifact
+    needs: build-wheels
     secrets: inherit
     strategy:
       fail-fast: false
@@ -82,7 +78,7 @@ jobs:
       runner-label: ${{ matrix.test-group.runner-label }}
   # TTNN FD Unit tests
   ttnn-unit-tests:
-    needs: build-docker-with-wheels-artifact
+    needs: build-wheels
     secrets: inherit
     strategy:
       fail-fast: false
@@ -98,7 +94,7 @@ jobs:
       runner-label: ${{ matrix.test-group.runner-label }}
   # FD Model Tests
   models-unit-tests:
-    needs: build-docker-with-wheels-artifact
+    needs: build-wheels
     secrets: inherit
     strategy:
       fail-fast: false

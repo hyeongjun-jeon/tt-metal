@@ -67,4 +67,16 @@ RUN apt-get -y update \
     libc++abi-17-dev \
     && rm -rf /var/lib/apt/lists/*
 
+WORKDIR /usr/app
+
+ARG UID=1000
+ARG GID=1000
+
+RUN groupadd -g "${GID}" python \
+    && useradd --create-home --no-log-init -u "${UID}" -g "${GID}" python
+
+RUN chown python:python -R /usr/app
+
+USER python
+
 CMD ["tail", "-f", "/dev/null"]

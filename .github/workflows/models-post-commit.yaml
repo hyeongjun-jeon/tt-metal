@@ -42,6 +42,7 @@ jobs:
       # so we try not to get hanging machines
       fail-fast: false
       matrix:
+        os: ["ubuntu-20.04"]
         test-group: [
           {name: model, cmd: ./tests/scripts/run_python_model_tests.sh},
         ]
@@ -65,6 +66,8 @@ jobs:
           docker_password: ${{ secrets.GITHUB_TOKEN }}
           docker_image_arch: ${{ inputs.arch }}
           run_args: |
+            WHEEL_FILENAME=$(ls -1 *.whl)
+            pip3 install --user $WHEEL_FILENAME
             ${{ matrix.test-group.cmd }}
       - uses: ./.github/actions/slack-report
         if: ${{ failure() }}

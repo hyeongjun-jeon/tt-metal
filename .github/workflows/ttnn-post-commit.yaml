@@ -42,6 +42,7 @@ jobs:
       # so we try not to get hanging machines
       fail-fast: false
       matrix:
+        os: ["ubuntu-20.04"]
         test-group:
           - name: ttnn group 1
             cmd: pytest tests/ttnn/unit_tests -xv --splits 6 --group 1 -m "not disable_fast_runtime_mode"
@@ -73,6 +74,9 @@ jobs:
         if: ${{ matrix.test-group.fast_runtime_mode_off }}
         run: |
           echo "TTNN_CONFIG_OVERRIDES={\"enable_fast_runtime_mode\": false}" >> $GITHUB_ENV
+      - uses: actions/download-artifact@v4
+        with:
+          name: eager-dist-${{ matrix.os }}-${{ inputs.arch }}
       - name: ${{ matrix.test-group.name }} tests
         timeout-minutes: 120
         uses: ./.github/actions/docker-run
@@ -81,6 +85,8 @@ jobs:
           docker_password: ${{ secrets.GITHUB_TOKEN }}
           docker_image_arch: ${{ inputs.arch }}
           run_args: |
+            WHEEL_FILENAME=$(ls -1 *.whl)
+            pip3 install --user $WHEEL_FILENAME
             ${{ matrix.test-group.cmd }}
       - uses: ./.github/actions/slack-report
         if: ${{ failure() }}
