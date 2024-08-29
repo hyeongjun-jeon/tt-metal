@@ -196,8 +196,8 @@ class TtLlamaModelForGeneration:
         batch, seq_len = tokens.shape
         assert seq_len <= 8 * 1024, f"Only prefill up to 2048 tokens is supported, got {seq_len}"
 
-        prefill_seq_len = 128 if seq_len <= 128 else 2048 if seq_len <= 2048 else 8 * 1024
-        self._update_model_config("prefill", batch, prefill_seq_len)
+        prefill_seq_len = 128 if seq_len <= 128 else 2048
+        self._update_model_config("prefill", 1, prefill_seq_len)
 
         batch, seq_len = tokens.shape
         last_token_idx = seq_len - 1
