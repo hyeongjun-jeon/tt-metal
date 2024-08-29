@@ -74,7 +74,7 @@ jobs:
         with:
           name: eager-dist-${{ matrix.os }}-${{ inputs.arch }}
       - name: ${{ matrix.test-group.name }} tests
-        timeout-minutes: 120
+        timeout-minutes: ${{ inputs.timeout }}
         uses: ./.github/actions/docker-run
         with:
           docker_username: ${{ github.actor }}

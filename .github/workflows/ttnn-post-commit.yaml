@@ -70,15 +70,15 @@ jobs:
       - "in-service"
     steps:
       - uses: tenstorrent-metal/metal-workflows/.github/actions/checkout-with-submodule-lfs@v2.0.0
+      - uses: actions/download-artifact@v4
+        with:
+          name: eager-dist-${{ matrix.os }}-${{ inputs.arch }}
       - name: Set ttnn fast runtime if exists in config
         if: ${{ matrix.test-group.fast_runtime_mode_off }}
         run: |
           echo "TTNN_CONFIG_OVERRIDES={\"enable_fast_runtime_mode\": false}" >> $GITHUB_ENV
-      - uses: actions/download-artifact@v4
-        with:
-          name: eager-dist-${{ matrix.os }}-${{ inputs.arch }}
       - name: ${{ matrix.test-group.name }} tests
-        timeout-minutes: 120
+        timeout-minutes: ${{ inputs.timeout }}
         uses: ./.github/actions/docker-run
         with:
           docker_username: ${{ github.actor }}
