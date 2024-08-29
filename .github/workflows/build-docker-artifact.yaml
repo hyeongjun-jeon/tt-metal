@@ -24,8 +24,7 @@ jobs:
       CONFIG: ci
       SILENT: 0
       VERBOSE: 1
-      TT_METAL_DOCKER_IMAGE: tt-metalium/${{ inputs.os}}
-      INPUT_IMAGE_TAG: ${{ github.ref_name }}
+      TT_METAL_DOCKER_IMAGE: tt-metalium/${{ inputs.os }}
     environment: dev
     runs-on:
       - build-docker

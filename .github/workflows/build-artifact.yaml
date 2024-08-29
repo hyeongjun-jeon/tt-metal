@@ -20,32 +20,6 @@ on:
         required: false
         type: string
         default: "ubuntu-20.04-amd64"
-  workflow_dispatch:
-    inputs:
-      arch:
-        required: false
-        type: string
-        default: '["grayskull", "wormhole_b0"]'
-      build-type:
-        required: false
-        type: choice
-        options:
-          - Release
-          - Debug
-          - RelWithDebInfo
-          - CI
-      tracy:
-        required: false
-        type: boolean
-        default: false
-        description: "Build with tracy enabled"
-      os:
-        required: false
-        type: choice
-        default: "ubuntu-20.04-amd64"
-        options:
-          - "ubuntu-20.04-amd64"
-          - "ubuntu-22.04-amd64"
 jobs:
   build-artifact:
     strategy:
