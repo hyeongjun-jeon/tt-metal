@@ -28,7 +28,7 @@ jobs:
       TT_METAL_DOCKER_IMAGE_TAG: ghcr.io/${{ github.repository }}/tt-metalium/${{ inputs.os }}:current
     environment: dev
     runs-on:
-      - build-docker
+      - docker
       - in-service
     steps:
       - uses: tenstorrent-metal/metal-workflows/.github/actions/checkout-with-submodule-lfs@v2.0.0
