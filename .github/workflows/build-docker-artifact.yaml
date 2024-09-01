@@ -63,7 +63,7 @@ jobs:
           ./scripts/docker/build_docker_image.sh ${{ inputs.os }} ${{ env.TT_METAL_DOCKER_IMAGE_TAG }}
       - name: Tag Docker main image as current image
         # NOTE: Ensure all outputs are prefixed by the same key used above e.g. `test_(...)` | `doc_(...)` | `src_(...)` when trying to access the `any_changed` output.
-        if: steps.changed-files-yaml.outputs.test_any_changed == 'false'
+        if: steps.changed-files-yaml.outputs.test_any_changed != 'true'
         env:
           TEST_ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.test_all_changed_files }}
         run: |
