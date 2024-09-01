@@ -54,16 +54,18 @@ jobs:
               - pyproject.toml
             metalium:
               - tt_metal/python_env/requirements-dev.txt
+          fetch_depth: '5'
+
       - name: Build Docker image if deps file(s) changed
         # NOTE: Ensure all outputs are prefixed by the same key used above e.g. `test_(...)` | `doc_(...)` | `src_(...)` when trying to access the `any_changed` output.
-        if: steps.changed-files-yaml.outputs.test_any_changed == 'true'
+        if: steps.changed-files-yaml.outputs.test_any_changed != 'true'
         env:
           TEST_ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.test_all_changed_files }}
         run: |
           ./scripts/docker/build_docker_image.sh ${{ inputs.os }} ${{ env.TT_METAL_DOCKER_IMAGE_TAG }}
       - name: Tag Docker main image as current image
         # NOTE: Ensure all outputs are prefixed by the same key used above e.g. `test_(...)` | `doc_(...)` | `src_(...)` when trying to access the `any_changed` output.
-        if: steps.changed-files-yaml.outputs.test_any_changed != 'true'
+        if: steps.changed-files-yaml.outputs.test_any_changed == 'true'
         env:
           TEST_ALL_CHANGED_FILES: ${{ steps.changed-files-yaml.outputs.test_all_changed_files }}
         run: |
@@ -74,7 +76,7 @@ jobs:
           if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
             echo "IMAGE_TAG=latest" >> $GITHUB_ENV
           else
-            echo "IMAGE_TAG=dev-${GITHUB_REF_NAME//\//-}" >> $GITHUB_ENV
+            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
           fi
       - name: Push Docker image to GitHub Container Registry
         run: |
