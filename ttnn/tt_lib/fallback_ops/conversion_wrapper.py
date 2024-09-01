@@ -2,11 +2,13 @@
 
 # SPDX-License-Identifier: Apache-2.0
 
-from tt_lib import tensor as ttl_tensor, device as ttl_device
+from tt_lib import tensor as ttl_tensor
+import ttnn
 import torch
 from functools import wraps
 from loguru import logger
 from contextlib import contextmanager
+import ttnn
 
 
 # Log only once to not pollute output
@@ -85,7 +87,7 @@ def convert_pt_tensor_to_tt_tensor(pt_tensor, output_format):
 
     if output_format["on_device"]:
         assert "device" in output_format
-        assert isinstance(output_format["device"], ttl_device.Device)
+        assert isinstance(output_format["device"], ttnn.Device)
         if (
             tt_tensor.get_layout() == ttl_tensor.Layout.TILE
             or tt_tensor.get_layout() == ttl_tensor.Layout.ROW_MAJOR
@@ -149,7 +151,7 @@ def convert_tt_tensors_wrapper(func):
 
         # Set default output format
         if output_format.get("device", None) is None and output_format["on_device"]:
-            output_format["device"] = ttl_device.GetDefaultDevice()
+            output_format["device"] = ttnn.GetDefaultDevice()
 
         outputs = func(*new_args, **new_kwargs)
 

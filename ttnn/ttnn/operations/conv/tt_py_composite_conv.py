@@ -389,7 +389,7 @@ class TTPyCompositeConv(TTPyOp):
     ):
         fp32_accum = (
             compute_kernel_config
-            and isinstance(compute_kernel_config, ttl.tensor.WormholeComputeKernelConfig)
+            and isinstance(compute_kernel_config, ttnn.WormholeComputeKernelConfig)
             and compute_kernel_config.fp32_dest_acc_en
         )
         self.use_dram_for_matmul = use_dram_for_matmul
@@ -803,7 +803,7 @@ class TTPyCompositeConv(TTPyOp):
                 if kernel_size == 1 and stride > 1:
                     use_downsample = True
             if use_downsample:
-                ttl.device.DumpDeviceMemoryState(device, "before_ds_")
+                ttnn.dump_device_memory_state(device, "before_ds_")
                 ds_out = ttnn.downsample(activation, [*self.input_tensor_shape[:-1], *self.strides])
                 if deallocate_activation:
                     activation.deallocate()
@@ -1040,12 +1040,12 @@ class TTPyCompositeConv(TTPyOp):
             conv_input_on_device = conv_input
         assert conv_input_on_device.get_legacy_shape()[3] % 16 == 0
         if not self.use_shallow_conv_variant:
-            input_padded_shape = ttl.tensor.pad_to_tile_shape(
+            input_padded_shape = ttnn.pad_to_tile_shape(
                 conv_input_on_device.get_legacy_shape(), False, False, True, True
             )
             assert self.padded_input_channels == input_padded_shape[3]
             if conv_input.get_legacy_shape() != input_padded_shape:
-                conv_input_on_device = ttl.tensor.format_input_tensor(
+                conv_input_on_device = ttnn.format_input_tensor(
                     conv_input_on_device,
                     self.device,
                     input_padded_shape,
@@ -1075,7 +1075,7 @@ class TTPyCompositeConv(TTPyOp):
 
         # convert tiled output to RM
         if conv_output_on_device.get_legacy_shape() != conv_output_on_device.shape_without_padding():
-            conv_output_on_device = ttl.tensor.format_output_tensor(
+            conv_output_on_device = ttnn.format_output_tensor(
                 conv_output_on_device,
                 conv_output_on_device.shape_without_padding(),
                 self.device,

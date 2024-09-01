@@ -91,7 +91,7 @@ def run_test_FalconCausalLM_end_to_end(
     else:
         raise NotImplementedError(f"Llm mode {llm_mode} is not supported! Must be one of prefill or decode.")
     for device in devices:
-        ttnn.device.synchronize_device(device)
+        ttnn.synchronize_device(device)
 
     # NOTE: Passing in pytorch tensor here instead of ll buda tensor
     # since we don't yet have embedding support on device
@@ -109,7 +109,7 @@ def run_test_FalconCausalLM_end_to_end(
         use_global_cos_sin_cache,
     )
     for device in devices:
-        ttnn.device.synchronize_device(device)
+        ttnn.synchronize_device(device)
     profiler.end("TtFalcon_model_setup")
 
     del state_dict
@@ -175,7 +175,7 @@ def run_test_FalconCausalLM_end_to_end(
 
     profiler.end("first_model_run_with_compile", force_enable=True)
     for device in devices:
-        ttnn.device.synchronize_device(device)
+        ttnn.synchronize_device(device)
 
     del tt_out
     del tt_layer_present
@@ -190,7 +190,7 @@ def run_test_FalconCausalLM_end_to_end(
 
     for _ in range(warmup_iterations):
         for device in devices:
-            ttnn.experimental.device.DumpDeviceProfiler(device)
+            ttnn.DumpDeviceProfiler(device)
         if llm_mode == "prefill":
             model_inputs = torch.split(model_input, 1)
             tt_inputs, tt_attention_mask = zip(
@@ -232,11 +232,11 @@ def run_test_FalconCausalLM_end_to_end(
 
     profiler.end(f"model_warmup_run_for_inference")
     for device in devices:
-        ttnn.device.synchronize_device(device)
+        ttnn.synchronize_device(device)
 
     # Run for perf iteration - profiler enabled
     for device in devices:
-        ttnn.experimental.device.DumpDeviceProfiler(device)
+        ttnn.DumpDeviceProfiler(device)
     profiler.enable()
     enable_persistent_kernel_cache()
     logger.info(f"Enable profiler and enable binary and compile cache")
@@ -286,7 +286,7 @@ def run_test_FalconCausalLM_end_to_end(
         _ = ttnn.to_torch(tt_FalconCausalLM.perf_e2e_test_tile_tensor)
 
     for device in devices:
-        ttnn.device.synchronize_device(device)
+        ttnn.synchronize_device(device)
 
     profiler.end(f"model_run_for_inference")
 
