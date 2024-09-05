@@ -38,6 +38,11 @@ ttnn.buffer_address = buffer_address
     ((16, ttnn.bfloat8_b, ttnn.bfloat8_b, ttnn.MathFidelity.LoFi),),
 )
 @pytest.mark.parametrize("enable_async_mode", [True, False], indirect=True)
+@pytest.mark.parametrize(
+    "mesh_device",
+    ((8, 4),),
+    indirect=True,
+)
 def test_run_resnet50_inference(
     mesh_device,
     use_program_cache,
@@ -99,6 +104,11 @@ def test_run_resnet50_inference(
     ((16, ttnn.bfloat8_b, ttnn.bfloat8_b, ttnn.MathFidelity.LoFi),),
 )
 @pytest.mark.parametrize("enable_async_mode", [True, False], indirect=True)
+@pytest.mark.parametrize(
+    "mesh_device",
+    ((8, 4),),
+    indirect=True,
+)
 def test_run_resnet50_trace_inference(
     mesh_device,
     use_program_cache,

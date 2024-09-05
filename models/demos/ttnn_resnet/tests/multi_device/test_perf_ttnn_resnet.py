@@ -454,6 +454,11 @@ def run_perf_resnet(
     ((16, True, 0.0100, 60),),
     indirect=["enable_async_mode"],
 )
+@pytest.mark.parametrize(
+    "mesh_device",
+    ((8, 4),),
+    indirect=True,
+)
 def test_perf_t3000(
     mesh_device,
     use_program_cache,
@@ -483,6 +488,11 @@ def test_perf_t3000(
     "device_batch_size, enable_async_mode, expected_inference_time, expected_compile_time",
     ((16, True, 0.0068, 60),),
     indirect=["enable_async_mode"],
+)
+@pytest.mark.parametrize(
+    "mesh_device",
+    ((8, 4),),
+    indirect=True,
 )
 def test_perf_trace_t3000(
     mesh_device,
