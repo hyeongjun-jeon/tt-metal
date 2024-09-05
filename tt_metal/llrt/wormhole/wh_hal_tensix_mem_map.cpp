@@ -18,10 +18,6 @@ namespace tt {
 
 namespace tt_metal {
 
-static inline int hv (enum HalMemAddrType v) {
-    return static_cast<int>(v);
-}
-
 HalCoreInfoType create_tensix_mem_map() {
 
     constexpr uint32_t num_proc_per_tensix_core = 5;

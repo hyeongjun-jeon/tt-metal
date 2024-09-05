@@ -40,6 +40,13 @@ enum class HalMemAddrType : uint8_t {
     COUNT = 7
 };
 
+enum class HalMemType : uint8_t {
+    L1 = 0,
+    DRAM = 1,
+    HOST = 2,
+    COUNT = 3
+};
+
 using DeviceAddr = std::uint64_t;
 
 class Hal;
@@ -82,6 +89,7 @@ class Hal {
     std::mutex lock;
     bool initialized_;
     std::vector<HalCoreInfoType> core_info_;
+    std::vector<uint32_t> mem_alignments_;
 
     void initialize_gs();
     void initialize_wh();
@@ -104,6 +112,8 @@ class Hal {
     template <typename T = DeviceAddr>
     T get_dev_addr(uint32_t programmable_core_type_index, HalMemAddrType addr_type) const;
     uint32_t get_dev_size(HalProgrammableCoreType programmable_core_type, HalMemAddrType addr_type) const;
+
+    uint32_t get_alignment(HalMemType memory_type) const;
 };
 
 inline uint32_t Hal::get_programmable_core_type_count() const {
@@ -135,6 +145,12 @@ inline uint32_t Hal::get_dev_size(HalProgrammableCoreType programmable_core_type
     uint32_t index = static_cast<std::underlying_type<HalProgrammableCoreType>::type>(programmable_core_type);
     TT_ASSERT(index < this->core_info_.size());
     return this->core_info_[index].get_dev_size(addr_type);
+}
+
+inline uint32_t Hal::get_alignment(HalMemType memory_type) const {
+    uint32_t index = static_cast<std::underlying_type<HalMemType>::type>(memory_type);
+    TT_ASSERT(index < this->mem_alignments_.size());
+    return this->mem_alignments_[index];
 }
 
 extern Hal hal;
