@@ -65,7 +65,7 @@ MorehAdamWDeviceOperation::tensor_return_value_t MorehAdamWDeviceOperation::crea
 
     tensor_return_value_t result;
 
-    auto memory_config = operation_attributes.memory_config.value_or(tensor_args.param_in.memory_config());
+    auto memory_config = operation_attributes.memory_config;
 
     if (tensor_args.param_out.has_value()) {
         result.push_back(tensor_args.param_out.value());
@@ -114,7 +114,7 @@ MorehAdamWDeviceOperation::invoke(
     const std::optional<const Tensor> exp_avg_out,
     const std::optional<const Tensor> exp_avg_sq_out,
     const std::optional<const Tensor> max_exp_avg_sq_out,
-    const std::optional<ttnn::MemoryConfig>& memory_config,
+    const MemoryConfig& memory_config,
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config) {
     return {
         operation_attributes_t{

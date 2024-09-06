@@ -25,7 +25,7 @@ struct MorehAdamWDeviceOperation {
         float weight_decay;
         uint32_t step;
         bool amsgrad;
-        const std::optional<ttnn::MemoryConfig>& memory_config;
+        const MemoryConfig& memory_config;
         std::optional<const DeviceComputeKernelConfig> compute_kernel_config;
     };
 
@@ -124,8 +124,7 @@ struct MorehAdamWDeviceOperation {
         const std::optional<const Tensor> exp_avg_out,
         const std::optional<const Tensor> exp_avg_sq_out,
         const std::optional<const Tensor> max_exp_avg_sq_out,
-        // CHECK if memconfg, compute kernel config require
-        const std::optional<ttnn::MemoryConfig>& memory_config,
+        const MemoryConfig& memory_config,
         std::optional<const DeviceComputeKernelConfig> compute_kernel_config);
 
     // Optional methods
