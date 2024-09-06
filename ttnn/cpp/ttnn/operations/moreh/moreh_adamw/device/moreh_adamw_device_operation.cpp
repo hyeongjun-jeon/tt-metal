@@ -65,10 +65,7 @@ MorehAdamWDeviceOperation::tensor_return_value_t MorehAdamWDeviceOperation::crea
 
     tensor_return_value_t result;
 
-    MemoryConfig memory_config = {.memory_layout = tt::tt_metal::TensorMemoryLayout::INTERLEAVED};
-    if (operation_attributes.memory_config.has_value()) {
-        memory_config = operation_attributes.memory_config.value();
-    }
+    auto memory_config = operation_attributes.memory_config.value_or(tensor_args.param_in.memory_config());
 
     if (tensor_args.param_out.has_value()) {
         result.push_back(tensor_args.param_out.value());
@@ -90,7 +87,7 @@ MorehAdamWDeviceOperation::tensor_return_value_t MorehAdamWDeviceOperation::crea
 
     if (tensor_args.max_exp_avg_sq_out.has_value()) {
         result.push_back(tensor_args.max_exp_avg_sq_out.value());
-    } else {
+    } else if (operation_attributes.amsgrad) {
         result.push_back(create_device_tensor(output_shapes.at(3), dtype, layout, device, memory_config));
     }
 

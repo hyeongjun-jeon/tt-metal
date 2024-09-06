@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include <optional>
+
 #include "moreh_adamw_device_operation.hpp"
 #include "ttnn/deprecated/tt_dnn/op_library/moreh_helper_functions.hpp"
 #include "ttnn/deprecated/tt_dnn/op_library/work_split.hpp"
@@ -30,10 +32,13 @@ MorehAdamWDeviceOperation::MultiCore::cached_program_t MorehAdamWDeviceOperation
     uint32_t num_units = param_in.volume() / tt::constants::TILE_HW;
 
     const std::optional<const Tensor> max_exp_avg_sq_in = tensor_args.max_exp_avg_sq_in;
+
     const Tensor& param_out = tensor_return_value.at(0);
     const Tensor& exp_avg_out = tensor_return_value.at(1);
     const Tensor& exp_avg_sq_out = tensor_return_value.at(2);
-    const Tensor& max_exp_avg_sq_out = tensor_return_value.at(3);
+    const std::optional<const Tensor> max_exp_avg_sq_out =
+        amsgrad ? std::optional<const Tensor>{tensor_return_value.at(3)} : std::nullopt;
+
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config = operation_attributes.compute_kernel_config;
 
     Program program{};
@@ -155,7 +160,8 @@ MorehAdamWDeviceOperation::MultiCore::cached_program_t MorehAdamWDeviceOperation
     const uint32_t param_out_addr = param_out.buffer()->address();
     const uint32_t exp_avg_out_addr = exp_avg_out.buffer()->address();
     const uint32_t exp_avg_sq_out_addr = exp_avg_sq_out.buffer()->address();
-    const uint32_t max_exp_avg_sq_out_addr = max_exp_avg_sq_out.buffer()->address();
+    const uint32_t max_exp_avg_sq_out_addr =
+        max_exp_avg_sq_out.has_value() ? max_exp_avg_sq_out.value().buffer()->address() : 0;
 
     union {
         float f;
@@ -249,7 +255,8 @@ void MorehAdamWDeviceOperation::MultiCore::override_runtime_arguments(
     const uint32_t param_out_addr = tensor_return_value.at(0).buffer()->address();
     const uint32_t exp_avg_out_addr = tensor_return_value.at(1).buffer()->address();
     const uint32_t exp_avg_sq_out_addr = tensor_return_value.at(2).buffer()->address();
-    const uint32_t max_exp_avg_sq_out_addr = tensor_return_value.at(3).buffer()->address();
+    const uint32_t max_exp_avg_sq_out_addr =
+        operation_attributes.amsgrad ? tensor_return_value.at(3).buffer()->address() : 0;
 
     for (uint32_t i = 0; i < num_cores; ++i) {
         CoreCoord core = {i / num_cores_y, i % num_cores_y};

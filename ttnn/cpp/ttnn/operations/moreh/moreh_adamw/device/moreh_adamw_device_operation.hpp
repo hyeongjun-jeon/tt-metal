@@ -7,9 +7,9 @@
 #include <optional>
 #include <variant>
 
-#include "ttnn/operations/core/compute_kernel/compute_kernel_config.hpp"
 #include "ttnn/decorators.hpp"
 #include "ttnn/device_operation.hpp"
+#include "ttnn/operations/core/compute_kernel/compute_kernel_config.hpp"
 #include "ttnn/tensor/tensor.hpp"
 #include "ttnn/types.hpp"
 
@@ -144,11 +144,11 @@ struct MorehAdamWDeviceOperation {
     */
 };
 
-}  // namespace ttnn::operations::adamw
+}  // namespace ttnn::operations::moreh::moreh_adamw
 
 // Register the operation with the ttnn::register_operation API to make it available to the user as
 // ttnn::prim::adamw
 namespace ttnn::prim {
-constexpr auto moreh_adamw =
-    ttnn::register_operation<"ttnn::prim::moreh_adamw", ttnn::operations::moreh::moreh_adamw::MorehAdamWDeviceOperation>();
+constexpr auto moreh_adamw = ttnn::
+    register_operation<"ttnn::prim::moreh_adamw", ttnn::operations::moreh::moreh_adamw::MorehAdamWDeviceOperation>();
 }  // namespace ttnn::prim
