@@ -5,6 +5,7 @@
 #include "moreh_adamw_device_operation.hpp"
 
 #include "tt_dnn/op_library/moreh_helper_functions.hpp"
+#include "ttnn/tensor/types.hpp"
 
 namespace ttnn::operations::moreh::moreh_adamw {
 
@@ -64,32 +65,33 @@ MorehAdamWDeviceOperation::tensor_return_value_t MorehAdamWDeviceOperation::crea
 
     tensor_return_value_t result;
 
+    MemoryConfig memory_config = {.memory_layout = tt::tt_metal::TensorMemoryLayout::INTERLEAVED};
+    if (operation_attributes.memory_config.has_value()) {
+        memory_config = operation_attributes.memory_config.value();
+    }
+
     if (tensor_args.param_out.has_value()) {
         result.push_back(tensor_args.param_out.value());
     } else {
-        result.push_back(
-            create_device_tensor(output_shapes.at(0), dtype, layout, device, operation_attributes.mem_config));
+        result.push_back(create_device_tensor(output_shapes.at(0), dtype, layout, device, memory_config));
     }
 
     if (tensor_args.exp_avg_out.has_value()) {
         result.push_back(tensor_args.exp_avg_out.value());
     } else {
-        result.push_back(
-            create_device_tensor(output_shapes.at(1), dtype, layout, device, operation_attributes.mem_config));
+        result.push_back(create_device_tensor(output_shapes.at(1), dtype, layout, device, memory_config));
     }
 
     if (tensor_args.exp_avg_sq_out.has_value()) {
         result.push_back(tensor_args.exp_avg_sq_out.value());
     } else {
-        result.push_back(
-            create_device_tensor(output_shapes.at(2), dtype, layout, device, operation_attributes.mem_config));
+        result.push_back(create_device_tensor(output_shapes.at(2), dtype, layout, device, memory_config));
     }
 
     if (tensor_args.max_exp_avg_sq_out.has_value()) {
         result.push_back(tensor_args.max_exp_avg_sq_out.value());
     } else {
-        result.push_back(
-            create_device_tensor(output_shapes.at(3), dtype, layout, device, operation_attributes.mem_config));
+        result.push_back(create_device_tensor(output_shapes.at(3), dtype, layout, device, memory_config));
     }
 
     return std::move(result);
@@ -115,10 +117,11 @@ MorehAdamWDeviceOperation::invoke(
     const std::optional<const Tensor> exp_avg_out,
     const std::optional<const Tensor> exp_avg_sq_out,
     const std::optional<const Tensor> max_exp_avg_sq_out,
-    const MemoryConfig& mem_config,
+    const std::optional<ttnn::MemoryConfig>& memory_config,
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config) {
     return {
-        operation_attributes_t{lr, beta1, beta2, eps, weight_decay, step, amsgrad, mem_config, compute_kernel_config},
+        operation_attributes_t{
+            lr, beta1, beta2, eps, weight_decay, step, amsgrad, memory_config, compute_kernel_config},
         tensor_args_t{
             param_in,
             grad,

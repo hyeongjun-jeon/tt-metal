@@ -34,7 +34,7 @@ struct MorehAdamw {
         const std::optional<const Tensor> exp_avg_out,
         const std::optional<const Tensor> exp_avg_sq_out,
         const std::optional<const Tensor> max_exp_avg_sq_out,
-        const MemoryConfig& mem_config,
+        const std::optional<ttnn::MemoryConfig>& memory_config,
         std::optional<const DeviceComputeKernelConfig> compute_kernel_config);
 };
 

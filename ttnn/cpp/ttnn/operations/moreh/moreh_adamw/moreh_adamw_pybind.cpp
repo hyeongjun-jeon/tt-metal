@@ -45,7 +45,7 @@ void bind_moreh_adamw_operation(py::module& module) {
                const std::optional<const Tensor> exp_avg_out,
                const std::optional<const Tensor> exp_avg_sq_out,
                const std::optional<const Tensor> max_exp_avg_sq_out,
-               const MemoryConfig& mem_config,
+               const std::optional<ttnn::MemoryConfig>& memory_config,
                std::optional<const DeviceComputeKernelConfig> compute_kernel_config) {
                 return self(
                     param_in,
@@ -64,7 +64,7 @@ void bind_moreh_adamw_operation(py::module& module) {
                     exp_avg_out,
                     exp_avg_sq_out,
                     max_exp_avg_sq_out,
-                    mem_config,
+                    memory_config,
                     compute_kernel_config);
             },
             py::arg("param_in"),
@@ -85,7 +85,7 @@ void bind_moreh_adamw_operation(py::module& module) {
             py::arg("exp_avg_sq_out") = std::nullopt,
             py::arg("max_exp_avg_sq_out") = std::nullopt,
 
-            py::arg("mem_config") = operation::DEFAULT_OUTPUT_MEMORY_CONFIG,
+            py::arg("memory_config") = std::nullopt,
             py::arg("compute_kernel_config") = std::nullopt});
 }
 
