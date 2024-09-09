@@ -46,7 +46,7 @@ std::vector<Tensor> MorehAdamw::invoke(
         exp_avg_out,
         exp_avg_sq_out,
         max_exp_avg_sq_out,
-        memory_config.value_or(param_in.memory_config()),
+        memory_config,
         compute_kernel_config);
 }
 }  // namespace ttnn::operations::moreh::moreh_adamw

@@ -121,11 +121,19 @@ MorehAdamWDeviceOperation::invoke(
     const std::optional<const Tensor> exp_avg_out,
     const std::optional<const Tensor> exp_avg_sq_out,
     const std::optional<const Tensor> max_exp_avg_sq_out,
-    const MemoryConfig memory_config,
+    const std::optional<ttnn::MemoryConfig>& memory_config,
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config) {
     return {
         operation_attributes_t{
-            lr, beta1, beta2, eps, weight_decay, step, amsgrad, memory_config, compute_kernel_config},
+            lr,
+            beta1,
+            beta2,
+            eps,
+            weight_decay,
+            step,
+            amsgrad,
+            memory_config.value_or(param_in.memory_config()),
+            compute_kernel_config},
         tensor_args_t{
             param_in,
             grad,
