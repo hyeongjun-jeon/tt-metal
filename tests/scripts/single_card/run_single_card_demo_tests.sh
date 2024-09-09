@@ -12,6 +12,11 @@ run_common_func_tests() {
   # Mistral7B
   WH_ARCH_YAML=wormhole_b0_80_arch_eth_dispatch.yaml pytest -n auto models/demos/wormhole/mistral7b/demo/demo.py --timeout 420; fail+=$?
 
+  #VGG 11
+  WH_ARCH_YAML=wormhole_b0_80_arch_eth_dispatch.yaml pytest -n auto pytest models/demos/functional_vgg/demo/demo.py::test_demo_imagenet_vgg11 --timeout 600; fail+=$?
+  #VGG 16
+  WH_ARCH_YAML=wormhole_b0_80_arch_eth_dispatch.yaml pytest -n auto pytest models/demos/functional_vgg/demo/demo.py::test_demo_imagenet_vgg16 --timeout 600; fail+=$?
+
   # Bert
   pytest -n auto --disable-warnings models/demos/metal_BERT_large_11/demo/demo.py -k batch_7; fail+=$?
   WH_ARCH_YAML=wormhole_b0_80_arch_eth_dispatch.yaml pytest -n auto --disable-warnings models/demos/metal_BERT_large_11/demo/demo.py -k batch_8; fail+=$?
