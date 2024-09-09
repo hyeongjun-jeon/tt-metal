@@ -25,7 +25,7 @@ struct MorehAdamWDeviceOperation {
         float weight_decay;
         uint32_t step;
         bool amsgrad;
-        const MemoryConfig& memory_config;
+        const MemoryConfig memory_config;
         std::optional<const DeviceComputeKernelConfig> compute_kernel_config;
     };
 
@@ -87,6 +87,8 @@ struct MorehAdamWDeviceOperation {
     // Select the program factory based on the operation attributes and tensor args
     static program_factory_t select_program_factory(const operation_attributes_t&, const tensor_args_t&);
 
+    static void validate_inputs(const operation_attributes_t& attributes, const tensor_args_t& tensor_args);
+
     // Validate the operation when it creates a program. Usually will have more checks
     static void validate_on_program_cache_miss(const operation_attributes_t&, const tensor_args_t&);
 
@@ -124,7 +126,7 @@ struct MorehAdamWDeviceOperation {
         const std::optional<const Tensor> exp_avg_out,
         const std::optional<const Tensor> exp_avg_sq_out,
         const std::optional<const Tensor> max_exp_avg_sq_out,
-        const MemoryConfig& memory_config,
+        const MemoryConfig memory_config,
         std::optional<const DeviceComputeKernelConfig> compute_kernel_config);
 
     // Optional methods

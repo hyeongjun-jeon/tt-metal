@@ -14,7 +14,7 @@ MorehAdamWDeviceOperation::program_factory_t MorehAdamWDeviceOperation::select_p
     return MultiCore{};
 }
 
-void MorehAdamWDeviceOperation::validate_on_program_cache_miss(
+void MorehAdamWDeviceOperation::validate_inputs(
     const operation_attributes_t& attributes, const tensor_args_t& tensor_args) {
     tt::operations::primary::check_tensor(tensor_args.param_in, "moreh_adamw", "param_in");
     tt::operations::primary::check_tensor(tensor_args.grad, "moreh_adamw", "grad");
@@ -41,8 +41,15 @@ void MorehAdamWDeviceOperation::validate_on_program_cache_miss(
     }
 }
 
+void MorehAdamWDeviceOperation::validate_on_program_cache_miss(
+    const operation_attributes_t& attributes, const tensor_args_t& tensor_args) {
+    validate_inputs(attributes, tensor_args);
+}
+
 void MorehAdamWDeviceOperation::validate_on_program_cache_hit(
-    const operation_attributes_t& attributes, const tensor_args_t& tensor_args) {}
+    const operation_attributes_t& attributes, const tensor_args_t& tensor_args) {
+    validate_inputs(attributes, tensor_args);
+}
 
 MorehAdamWDeviceOperation::shape_return_value_t MorehAdamWDeviceOperation::compute_output_shapes(
     const operation_attributes_t& operation_attributes, const tensor_args_t& tensor_args) {
@@ -114,7 +121,7 @@ MorehAdamWDeviceOperation::invoke(
     const std::optional<const Tensor> exp_avg_out,
     const std::optional<const Tensor> exp_avg_sq_out,
     const std::optional<const Tensor> max_exp_avg_sq_out,
-    const MemoryConfig& memory_config,
+    const MemoryConfig memory_config,
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config) {
     return {
         operation_attributes_t{
