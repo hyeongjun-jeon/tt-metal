@@ -19,7 +19,7 @@ void bind_moreh_adamw_operation(py::module& module) {
     bind_registered_operation(
         module,
         ttnn::moreh_adamw,
-        R"doc(moreh_adamw(param_in: ttnn.Tensor) -> ttnn.Tensor)doc",
+        "Moreh Adamw Operation",
         // Add pybind overloads for the C++ APIs that should be exposed to python
         // There should be no logic here, just a call to `self` with the correct arguments
         // The overload with `queue_id` argument will be added automatically for primitive operations
