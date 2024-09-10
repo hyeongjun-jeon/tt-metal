@@ -5,11 +5,13 @@
 #include "moreh_pybind.hpp"
 
 #include "ttnn/operations/moreh/moreh_adam/moreh_adam_pybind.hpp"
+#include "ttnn/operations/moreh/moreh_adamw/moreh_adamw_pybind.hpp"
 #include "ttnn/operations/moreh/moreh_arange/moreh_arange_pybind.hpp"
 
 namespace ttnn::operations::moreh {
 void bind_moreh_operations(py::module &module) {
     moreh_arange::bind_moreh_arange_operation(module);
     moreh_adam::bind_moreh_adam_operation(module);
+    moreh_adamw::bind_moreh_adamw_operation(module);
 }
 }  // namespace ttnn::operations::moreh
