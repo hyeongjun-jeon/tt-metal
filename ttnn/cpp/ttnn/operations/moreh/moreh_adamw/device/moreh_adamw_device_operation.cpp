@@ -108,13 +108,13 @@ MorehAdamWDeviceOperation::invoke(
     const Tensor& exp_avg_in,
     const Tensor& exp_avg_sq_in,
 
-    float lr,
-    float beta1,
-    float beta2,
-    float eps,
-    float weight_decay,
-    uint32_t step,
-    bool amsgrad,
+    const std::optional<float> lr,
+    const std::optional<float> beta1,
+    const std::optional<float> beta2,
+    const std::optional<float> eps,
+    const std::optional<float> weight_decay,
+    const std::optional<uint32_t> step,
+    const std::optional<bool> amsgrad,
 
     const std::optional<const Tensor> max_exp_avg_sq_in,
     const std::optional<const Tensor> param_out,
@@ -125,13 +125,13 @@ MorehAdamWDeviceOperation::invoke(
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config) {
     return {
         operation_attributes_t{
-            lr,
-            beta1,
-            beta2,
-            eps,
-            weight_decay,
-            step,
-            amsgrad,
+            lr.value_or(0.001f),
+            beta1.value_or(0.9f),
+            beta2.value_or(0.999f),
+            eps.value_or(1e-8f),
+            weight_decay.value_or(1e-2f),
+            step.value_or(0),
+            amsgrad.value_or(false),
             memory_config.value_or(param_in.memory_config()),
             compute_kernel_config},
         tensor_args_t{
