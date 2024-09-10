@@ -10,6 +10,7 @@
 #include "ttnn/operations/moreh/moreh_dot_op_backward/moreh_dot_backward_pybind.hpp"
 #include "ttnn/operations/moreh/moreh_getitem/moreh_getitem_pybind.hpp"
 #include "ttnn/operations/moreh/moreh_matmul/moreh_matmul_pybind.hpp"
+#include "ttnn/operations/moreh/moreh_matmul_backward/moreh_matmul_backward_pybind.hpp"
 #include "ttnn/operations/moreh/moreh_mean/moreh_mean_pybind.hpp"
 #include "ttnn/operations/moreh/moreh_mean_backward/moreh_mean_backward_pybind.hpp"
 #include "ttnn/operations/moreh/moreh_nll_loss_backward/moreh_nll_loss_backward_pybind.hpp"
@@ -29,5 +30,6 @@ void bind_moreh_operations(py::module &module) {
     moreh_nll_loss_unreduced_backward::bind_moreh_nll_loss_unreduced_backward_operation(module);
     moreh_nll_loss_backward::bind_moreh_nll_loss_backward_operation(module);
     moreh_matmul::bind_moreh_matmul_operation(module);
+    moreh_matmul_backward::bind_moreh_matmul_backward_operation(module);
 }
 }  // namespace ttnn::operations::moreh
