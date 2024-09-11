@@ -10,10 +10,7 @@ import ttnn
 
 import pytest
 from models.utility_functions import (
-    skip_for_wormhole_b0,
     comp_allclose_and_pcc,
-    comp_pcc,
-    comp_allclose,
 )
 from tests.tt_eager.python_api_testing.unit_testing.misc.test_utils import (
     get_compute_kernel_options,
