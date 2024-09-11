@@ -414,11 +414,9 @@ def determinism_check_iterations(request):
     iterations = request.config.getoption("--determinism-check-iterations")
     # we return 1 in case the option is not passed or the passed value is not valid
     if iterations is not None:
-        try:
-            return int(iterations)
-        except ValueError:
-            return 1
-    return 1
+        # this will throw an error if bad value is passed
+        return int(iterations)
+    return -1
 
 
 @pytest.fixture
