@@ -202,9 +202,9 @@ def test_moreh_adamw(shape, lr, betas, eps, weight_decay, amsgrad, step, device)
 def test_moreh_adamw_callback(shape, lr, betas, eps, weight_decay, amsgrad, step, device, use_program_cache):
     torch.manual_seed(0)
     for _ in range(2):
+        run_moreh_adamw(shape, lr, betas, eps, weight_decay, amsgrad, step, device)
         # Add dummy tensor to make sure that created tensor in 2 iteration don't share the same addr
         tt_dummy_tensor = ttnn.empty([1, 1, 32, 32], ttnn.bfloat16, ttnn.TILE_LAYOUT, device)
-        run_moreh_adamw(shape, lr, betas, eps, weight_decay, amsgrad, step, device)
 
 
 @pytest.mark.parametrize(
