@@ -18,13 +18,13 @@ namespace ttnn::operations::moreh::moreh_adamw {
 struct MorehAdamWDeviceOperation {
     // Define the operation attributes. This is it to store all variables needed by operations that aren't tensors
     struct operation_attributes_t {
-        float lr;
-        float beta1;
-        float beta2;
-        float eps;
-        float weight_decay;
-        uint32_t step;
-        bool amsgrad;
+        float lr = 0.001f;
+        float beta1 = 0.9f;
+        float beta2 = 0.999f;
+        float eps = 1e-8f;
+        float weight_decay = 1e-2f;
+        uint32_t step = 0;
+        bool amsgrad = false;
         const MemoryConfig memory_config;
         std::optional<const DeviceComputeKernelConfig> compute_kernel_config;
     };
