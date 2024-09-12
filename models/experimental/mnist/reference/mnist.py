@@ -16,7 +16,7 @@ class MnistModel(torch.nn.Module):
         self.load_state_dict(state_dict)
 
     def forward(self, x):
-        x = x.view(-1)
+        x = x.view(x.shape[0], -1)
 
         x = self.fc1(x)
         x = torch.nn.functional.relu(x)
