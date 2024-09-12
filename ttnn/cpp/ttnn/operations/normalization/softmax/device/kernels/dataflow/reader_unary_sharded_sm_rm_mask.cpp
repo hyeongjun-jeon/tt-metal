@@ -16,6 +16,7 @@ void kernel_main() {
     const uint32_t mask_start_tile_id  = get_arg_val<uint32_t>(3);
 
     constexpr uint32_t cb_attn = tt::CB::c_in3;
+    constexpr uint32_t cb_scratch = tt::CB::c_intermed3;
     uint32_t mask_tile_bytes = get_tile_size(cb_attn);
 
     #define stick_size_is_pow2 get_compile_time_arg_val(2) == 1
@@ -41,20 +42,54 @@ void kernel_main() {
     generate_bcast_unary_scalar(cb_fused_scale, pre_scale);
 
     constexpr uint32_t FLOAT32_DTYPE = get_compile_time_arg_val(4);
-    uint32_t mask_read_tile_face_bytes = FLOAT32_DTYPE ? 64 : 32;
     uint32_t mask_read_tile_offset_bytes = FLOAT32_DTYPE ? 1024 : 512;
 
-    cb_reserve_back(cb_attn, block_wt);
-    uint32_t l1_write_addr = get_write_ptr(cb_attn);
-    for (uint32_t w = 0; w<block_wt; w++) {
-        uint64_t mask_noc_addr = get_noc_addr(mask_start_tile_id + w, addr_mask);
-        noc_async_read(mask_noc_addr, l1_write_addr, mask_read_tile_face_bytes);
-        mask_noc_addr += mask_read_tile_face_bytes;
-        noc_async_read(mask_noc_addr, l1_write_addr + mask_read_tile_offset_bytes, mask_read_tile_face_bytes);
-        l1_write_addr += mask_tile_bytes;
+    constexpr bool use_scratch_mem = get_compile_time_arg_val(6) == 1;
+
+    if constexpr (use_scratch_mem) {
+        uint32_t mask_read_tile_face_bytes = FLOAT32_DTYPE ? 128 : 64;
+
+        cb_reserve_back(cb_scratch, block_wt);
+        uint32_t l1_write_addr = get_write_ptr(cb_scratch);
+        for (uint32_t w = 0; w<block_wt; w++) {
+            uint64_t mask_noc_addr = get_noc_addr(mask_start_tile_id + w, addr_mask);
+            noc_async_read(mask_noc_addr, l1_write_addr, mask_read_tile_face_bytes);
+            l1_write_addr += mask_read_tile_face_bytes;
+        }
+        noc_async_read_barrier();
+        cb_push_back(cb_scratch, block_wt);
+
+        uint32_t scratch_read_tile_face_bytes = FLOAT32_DTYPE ? 64 : 32;
+
+        cb_reserve_back(cb_attn, block_wt);
+        l1_write_addr = get_write_ptr(cb_attn);
+        uint32_t l1_read_addr = get_read_ptr(cb_scratch);
+        uint64_t l1_noc_addr = get_noc_addr(l1_read_addr);
+        for (uint32_t w = 0; w<block_wt; w++) {
+            noc_async_read(l1_noc_addr, l1_write_addr, scratch_read_tile_face_bytes);
+            l1_noc_addr += scratch_read_tile_face_bytes;
+            noc_async_read(l1_noc_addr, l1_write_addr + mask_read_tile_offset_bytes, scratch_read_tile_face_bytes);
+            l1_noc_addr += scratch_read_tile_face_bytes;
+            l1_write_addr += mask_tile_bytes;
+        }
+        noc_async_read_barrier();
+        cb_push_back(cb_attn, block_wt);
+
+    } else {
+        uint32_t mask_read_tile_face_bytes = FLOAT32_DTYPE ? 64 : 32;
+
+        cb_reserve_back(cb_attn, block_wt);
+        uint32_t l1_write_addr = get_write_ptr(cb_attn);
+        for (uint32_t w = 0; w<block_wt; w++) {
+            uint64_t mask_noc_addr = get_noc_addr(mask_start_tile_id + w, addr_mask);
+            noc_async_read(mask_noc_addr, l1_write_addr, mask_read_tile_face_bytes);
+            mask_noc_addr += mask_read_tile_face_bytes;
+            noc_async_read(mask_noc_addr, l1_write_addr + mask_read_tile_offset_bytes, mask_read_tile_face_bytes);
+            l1_write_addr += mask_tile_bytes;
+        }
+        noc_async_read_barrier();
+        cb_push_back(cb_attn, block_wt);
     }
-    noc_async_read_barrier();
-    cb_push_back(cb_attn, block_wt);
     #endif
 
     {

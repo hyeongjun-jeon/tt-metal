@@ -583,17 +583,15 @@ operation::ProgramWithCallbacks scale_mask_softmax_sharded_multi_core(
         {(std::size_t) start_core_x, (std::size_t) start_core_y},
         {(std::size_t) start_core_x + num_cores_c - 1, (std::size_t) start_core_y + num_cores_r - 1});
     // reader compile arg
-    bool is_dram_mask = 0;
-    if (mask.has_value()) {
-        is_dram_mask = mask->buffer()->buffer_type() == tt::tt_metal::BufferType::DRAM ? 1 : 0;
-    }
+    bool is_dram_mask = mask.has_value() and mask->buffer()->buffer_type() == tt::tt_metal::BufferType::DRAM ? 1 : 0;
+    bool use_row_major_kernel = (mask.has_value() and mask->get_layout() == Layout::ROW_MAJOR);
+    bool use_scratch_pad = use_row_major_kernel and is_dram_mask and device->arch() == tt::ARCH::BLACKHOLE;
     std::vector<uint32_t> reader_compile_time_args = {
         (std::uint32_t) block_wt,
         (std::uint32_t) is_dram_mask
     };
     std::map<string, string> softmax_defines;
     // hw_dims_only_causal_mask does not support RM Layout atm
-    bool use_row_major_kernel = (mask.has_value() and mask->get_layout() == Layout::ROW_MAJOR);
     if (use_row_major_kernel) {
         auto mask_stick_size = mask->get_legacy_shape()[3] * mask->element_size();
         bool mask_stick_size_is_power_of_two = is_power_of_two_at_least_32(mask_stick_size);
@@ -617,6 +615,7 @@ operation::ProgramWithCallbacks scale_mask_softmax_sharded_multi_core(
     }
     reader_compile_time_args.push_back((std::uint32_t) (mask_cb_data_format == tt::DataFormat::Float32)); // mask float32
     reader_compile_time_args.push_back((std::uint32_t) mask_Ht);
+    reader_compile_time_args.push_back((std::uint32_t) use_scratch_pad);
 
     if (mask.has_value()) {
         softmax_defines["FUSED_SCALE_MASK"] = "1";
@@ -704,6 +703,14 @@ operation::ProgramWithCallbacks scale_mask_softmax_sharded_multi_core(
     auto c_intermed1_config = CircularBufferConfig(im1_CB_size, {{tt::CB::c_intermed1, im_cb_data_format}})
         .set_page_size(tt::CB::c_intermed1, im_tile_size);
     auto cb_intermed1_id = CreateCircularBuffer( program, all_device_cores, c_intermed1_config );
+    // scratch pad memory for BH
+    if (use_scratch_pad) {
+        uint32_t mask_stick_size = mask->get_legacy_shape()[3] * mask->element_size();
+        uint32_t sratch_size = mask->volume() * mask->element_size();
+        auto c_scratch_config = CircularBufferConfig(sratch_size, {{tt::CB::c_intermed3, mask_cb_data_format}})
+            .set_page_size(tt::CB::c_intermed3, mask_stick_size);
+        auto cb_scratch = CreateCircularBuffer( program, all_device_cores, c_scratch_config );
+    }
 
     // Runtime Args
     uint32_t mask_addr = mask.has_value() ? mask->buffer()->address() : 0;
