@@ -302,7 +302,7 @@ def gen_tensor_unpad_args(
     assert len(input_shapes[0]) == 4
     test_args = {}
     output_tensor_start = [random.randint(0, input_shapes[0][i] - 1) for i in range(4)]
-    output_tensor_end = [random.randint(output_tensor_start[i], input_shapes[0][i] - 1) for i in range(4)]
+    output_tensor_end = [random.randint(output_tensor_start[i], input_shapes[0][i]) for i in range(4)]
 
     test_args.update(
         {

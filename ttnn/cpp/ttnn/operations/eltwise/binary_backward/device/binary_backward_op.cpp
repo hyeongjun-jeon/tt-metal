@@ -461,12 +461,12 @@ std::vector<Tensor> _concat_bw(
     std::vector<Tensor> grad_tensor;
     std::vector<uint32_t> start_index = {0, 0, 0, 0};
     std::vector<uint32_t> end_index = {
-        input.get_legacy_shape()[0] - 1,
-        input.get_legacy_shape()[1] - 1,
-        input.get_legacy_shape()[2] - 1,
-        input.get_legacy_shape()[3] - 1};
-
-    Tensor grad_a = ttnn::slice(0, grad, start_index, end_index, std::nullopt, std::nullopt);
+        input.get_legacy_shape()[0],
+        input.get_legacy_shape()[1],
+        input.get_legacy_shape()[2],
+        input.get_legacy_shape()[3]};
+    std::vector<uint32_t> step = std::vector<uint32_t>({1, 1, 1, 1});
+    Tensor grad_a = ttnn::slice(0, grad, start_index, end_index, step, std::nullopt);
     grad_tensor.emplace_back(grad_a);
 
     std::vector<uint32_t> start_index_2 = {0, 0, 0, 0};
@@ -481,11 +481,12 @@ std::vector<Tensor> _concat_bw(
         start_index_2 = {0, 0, 0, input.get_legacy_shape()[3]};
     }
     std::vector<uint32_t> end_index_2 = {
-        grad.get_legacy_shape()[0] - 1,
-        grad.get_legacy_shape()[1] - 1,
-        grad.get_legacy_shape()[2] - 1,
-        grad.get_legacy_shape()[3] - 1};
-    Tensor grad_b = ttnn::slice(0, grad, start_index_2, end_index_2, std::nullopt, std::nullopt);
+        grad.get_legacy_shape()[0],
+        grad.get_legacy_shape()[1],
+        grad.get_legacy_shape()[2],
+        grad.get_legacy_shape()[3]};
+    std::vector<uint32_t> step_2 = std::vector<uint32_t>({1, 1, 1, 1});
+    Tensor grad_b = ttnn::slice(0, grad, start_index_2, end_index_2, step_2, std::nullopt);
     grad_tensor.emplace_back(grad_b);
 
     return grad_tensor;
