@@ -8,3 +8,4 @@ arange = ttnn._ttnn.operations.moreh.moreh_arange
 adam = ttnn._ttnn.operations.moreh.moreh_adam
 getitem = ttnn._ttnn.operations.moreh.moreh_getitem
 norm = ttnn._ttnn.operations.moreh.moreh_norm
+norm_backward = ttnn._ttnn.operations.moreh.moreh_norm_backward

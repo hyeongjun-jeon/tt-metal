@@ -8,6 +8,7 @@
 #include "ttnn/operations/moreh/moreh_arange/moreh_arange_pybind.hpp"
 #include "ttnn/operations/moreh/moreh_getitem/moreh_getitem_pybind.hpp"
 #include "ttnn/operations/moreh/moreh_norm/moreh_norm_pybind.hpp"
+#include "ttnn/operations/moreh/moreh_norm_backward/moreh_norm_backward_pybind.hpp"
 
 namespace ttnn::operations::moreh {
 void bind_moreh_operations(py::module &module) {
@@ -15,5 +16,6 @@ void bind_moreh_operations(py::module &module) {
     moreh_adam::bind_moreh_adam_operation(module);
     moreh_getitem::bind_moreh_getitem_operation(module);
     moreh_norm::bind_moreh_norm_operation(module);
+    moreh_norm_backward::bind_moreh_norm_backward_operation(module);
 }
 }  // namespace ttnn::operations::moreh

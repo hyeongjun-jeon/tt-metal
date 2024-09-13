@@ -106,30 +106,25 @@ def run_moreh_norm(input_shape, p, dim, rtol, atol, device, keepdim=False, compu
     assert pass_y
 
 
-# def run_moreh_norm_backward(input_shape, p, dim, rtol, atol, device, keepdim=False, compute_kernel_options=None):
-#     check_dim(input_shape, dim, keepdim)
+def run_moreh_norm_backward(input_shape, p, dim, rtol, atol, device, keepdim=False, compute_kernel_options=None):
+    check_dim(input_shape, dim, keepdim)
 
-#     cpu_x, cpu_dy = make_cpu_tensors(input_shape, dim, keepdim=keepdim)
+    cpu_x, cpu_dy = make_cpu_tensors(input_shape, dim, keepdim=keepdim)
 
-#     # expected
-#     _, expected_dx = torch_norm(cpu_x, cpu_dy, p=p, dim=dim, keepdim=keepdim, do_backward=True)
+    _, expected_dx = torch_norm(cpu_x, cpu_dy, p=p, dim=dim, keepdim=keepdim, do_backward=True)
+    _, actual_dx = tt_norm(
+        cpu_x,
+        cpu_dy,
+        p=p,
+        dim=dim,
+        compute_kernel_options=compute_kernel_options,
+        device=device,
+        do_backward=True,
+    )
 
-#     # actual
-#     _, actual_dx = tt_norm(
-#         cpu_x,
-#         cpu_dy,
-#         p=p,
-#         dim=dim,
-#         compute_kernel_options=compute_kernel_options,
-#         device=device,
-#         do_backward=True,
-#     )
-
-#     # Check input_grad
-#     pass_dx, out_dx = comp_allclose(expected_dx, actual_dx, rtol=rtol, atol=atol)
-#     logger.debug(f"input_grad's {out_dx}")
-
-#     assert pass_dx
+    pass_dx, out_dx = comp_allclose(expected_dx, actual_dx, rtol=rtol, atol=atol)
+    logger.debug(f"input_grad's {out_dx}")
+    assert pass_dx
 
 
 @pytest.mark.parametrize("p", [2.0, 2.5, -2.5], ids=["p=2.0", "p=2.5", "p=-2.5"])
@@ -202,127 +197,117 @@ def test_moreh_norm(input_shape, p, dim_rtol_atol, keepdim, device):
 @pytest.mark.parametrize("compute_kernel_options", compute_kernel_options, ids=compute_kernel_ids)
 def test_moreh_norm_compute_kernel_options(input_shape, p, dim_rtol_atol, compute_kernel_options, device):
     torch.manual_seed(2024)
-
     dim, rtol, atol = dim_rtol_atol
-
     run_moreh_norm(input_shape, p, dim, rtol, atol, device, compute_kernel_options=compute_kernel_options)
 
 
-# @pytest.mark.parametrize("p", [2.0], ids=["p=2.0"])
-# @pytest.mark.parametrize(
-#     "dim_rtol_atol",
-#     [
-#         [0, 0.1, 0.1],
-#         [1, 0.1, 0.1],
-#         [2, 0.1, 0.1],
-#     ],
-# )
-# @pytest.mark.parametrize(
-#     "input_shape",
-#     [
-#         [10, TILE_HEIGHT, TILE_WIDTH],
-#     ],
-# )
-# def test_moreh_norm_callback(input_shape, p, dim_rtol_atol, device, use_program_cache):
-#     torch.manual_seed(2024)
-
-#     dim, rtol, atol = dim_rtol_atol
-
-#     for _ in range(2):
-#         run_moreh_norm(input_shape, p, dim, rtol, atol, device)
+@pytest.mark.parametrize("p", [2.0], ids=["p=2.0"])
+@pytest.mark.parametrize(
+    "dim_rtol_atol",
+    [
+        [0, 0.1, 0.1],
+        [1, 0.1, 0.1],
+        [2, 0.1, 0.1],
+    ],
+)
+@pytest.mark.parametrize(
+    "input_shape",
+    [
+        [10, TILE_HEIGHT, TILE_WIDTH],
+    ],
+)
+def test_moreh_norm_callback(input_shape, p, dim_rtol_atol, device, use_program_cache):
+    torch.manual_seed(2024)
+    dim, rtol, atol = dim_rtol_atol
+    for _ in range(2):
+        run_moreh_norm(input_shape, p, dim, rtol, atol, device)
 
 
-# @pytest.mark.parametrize("p", [2.0], ids=["p=2.0"])
-# @pytest.mark.parametrize(
-#     "dim_rtol_atol",
-#     [
-#         [[], 0.2, 0.2],
-#         [None, 0.2, 0.2],
-#         [0, 0.1, 0.1],
-#         [1, 0.1, 0.1],
-#         [2, 0.1, 0.1],
-#         [3, 0.1, 0.1],
-#         [[0, 1], 0.1, 0.1],
-#         [[0, 1, 2], 0.15, 0.15],
-#         [[0, 1, 2, 3], 0.2, 0.2],
-#         [[0, 1, 3], 0.15, 0.15],
-#         [[0, 2, 3], 0.15, 0.15],
-#         [[1, 2], 0.1, 0.1],
-#         [[1, 2, 3], 0.15, 0.15],
-#         [[1, 3], 0.1, 0.1],
-#         [[2, 3], 0.1, 0.1],
-#     ],
-#     ids=[
-#         "global_norm(dim=[])",
-#         "global_norm(dim=None)",
-#         "N",
-#         "C",
-#         "H",
-#         "W",
-#         "NC",
-#         "NCH",
-#         "NCHW",
-#         "NCW",
-#         "NHW",
-#         "CH",
-#         "CHW",
-#         "CW",
-#         "HW",
-#     ],
-# )
-# @pytest.mark.parametrize(
-#     "input_shape",
-#     [
-#         [TILE_HEIGHT, TILE_WIDTH],
-#         [2, 2, 2 * TILE_HEIGHT + 13, 2 * TILE_WIDTH + 13],
-#     ],
-# )
-# @pytest.mark.parametrize("keepdim", [True, False], ids=["keepdim-true", "keepdim-flase"])
-# def test_moreh_norm_backward(input_shape, p, dim_rtol_atol, keepdim, device):
-#     torch.manual_seed(2024)
-
-#     dim, rtol, atol = dim_rtol_atol
-
-#     run_moreh_norm_backward(input_shape, p, dim, rtol, atol, device, keepdim=keepdim)
+@pytest.mark.parametrize("p", [2.0], ids=["p=2.0"])
+@pytest.mark.parametrize(
+    "dim_rtol_atol",
+    [
+        [[], 0.2, 0.2],
+        [None, 0.2, 0.2],
+        [0, 0.1, 0.1],
+        [1, 0.1, 0.1],
+        [2, 0.1, 0.1],
+        [3, 0.1, 0.1],
+        [[0, 1], 0.1, 0.1],
+        [[0, 1, 2], 0.15, 0.15],
+        [[0, 1, 2, 3], 0.2, 0.2],
+        [[0, 1, 3], 0.15, 0.15],
+        [[0, 2, 3], 0.15, 0.15],
+        [[1, 2], 0.1, 0.1],
+        [[1, 2, 3], 0.15, 0.15],
+        [[1, 3], 0.1, 0.1],
+        [[2, 3], 0.1, 0.1],
+    ],
+    ids=[
+        "global_norm(dim=[])",
+        "global_norm(dim=None)",
+        "N",
+        "C",
+        "H",
+        "W",
+        "NC",
+        "NCH",
+        "NCHW",
+        "NCW",
+        "NHW",
+        "CH",
+        "CHW",
+        "CW",
+        "HW",
+    ],
+)
+@pytest.mark.parametrize(
+    "input_shape",
+    [
+        [TILE_HEIGHT, TILE_WIDTH],
+        [2, 2, 2 * TILE_HEIGHT + 13, 2 * TILE_WIDTH + 13],
+    ],
+)
+@pytest.mark.parametrize("keepdim", [True, False], ids=["keepdim-true", "keepdim-flase"])
+def test_moreh_norm_backward(input_shape, p, dim_rtol_atol, keepdim, device):
+    torch.manual_seed(2024)
+    dim, rtol, atol = dim_rtol_atol
+    run_moreh_norm_backward(input_shape, p, dim, rtol, atol, device, keepdim=keepdim)
 
 
-# @pytest.mark.parametrize("p", [2.0], ids=["p=2.0"])
-# @pytest.mark.parametrize(
-#     "dim_rtol_atol",
-#     [
-#         [[], 0.2, 0.2],
-#     ],
-# )
-# @pytest.mark.parametrize(
-#     "input_shape",
-#     [[2, 2], [32, 2], [2, 32], [32, 32]],
-# )
-# @pytest.mark.parametrize("compute_kernel_options", compute_kernel_options, ids=compute_kernel_ids)
-# def test_moreh_norm_backward_compute_kernel_options(input_shape, p, dim_rtol_atol, compute_kernel_options, device):
-#     torch.manual_seed(2024)
-
-#     dim, rtol, atol = dim_rtol_atol
-
-#     run_moreh_norm_backward(input_shape, p, dim, rtol, atol, device, compute_kernel_options=compute_kernel_options)
+@pytest.mark.parametrize("p", [2.0], ids=["p=2.0"])
+@pytest.mark.parametrize(
+    "dim_rtol_atol",
+    [
+        [[], 0.2, 0.2],
+    ],
+)
+@pytest.mark.parametrize(
+    "input_shape",
+    [[2, 2], [32, 2], [2, 32], [32, 32]],
+)
+@pytest.mark.parametrize("compute_kernel_options", compute_kernel_options, ids=compute_kernel_ids)
+def test_moreh_norm_backward_compute_kernel_options(input_shape, p, dim_rtol_atol, compute_kernel_options, device):
+    torch.manual_seed(2024)
+    dim, rtol, atol = dim_rtol_atol
+    run_moreh_norm_backward(input_shape, p, dim, rtol, atol, device, compute_kernel_options=compute_kernel_options)
 
 
-# @pytest.mark.parametrize("p", [1.5], ids=["p=2.0"])
-# @pytest.mark.parametrize(
-#     "dim_rtol_atol",
-#     [
-#         [[], 0.2, 0.2],
-#     ],
-# )
-# @pytest.mark.parametrize(
-#     "input_shape",
-#     [
-#         [4, 4],
-#     ],
-# )
-# def test_moreh_norm_backward_callback(input_shape, p, dim_rtol_atol, device, use_program_cache):
-#     torch.manual_seed(2024)
-
-#     dim, rtol, atol = dim_rtol_atol
-
-#     for _ in range(2):
-#         run_moreh_norm_backward(input_shape, p, dim, rtol, atol, device)
+@pytest.mark.parametrize("p", [1.5], ids=["p=2.0"])
+@pytest.mark.parametrize(
+    "dim_rtol_atol",
+    [
+        [[], 0.2, 0.2],
+    ],
+)
+@pytest.mark.parametrize(
+    "input_shape",
+    [
+        [4, 4],
+    ],
+)
+def test_moreh_norm_backward_callback(input_shape, p, dim_rtol_atol, device, use_program_cache):
+    torch.manual_seed(2024)
+    dim, rtol, atol = dim_rtol_atol
+    for _ in range(2):
+        run_moreh_norm_backward(input_shape, p, dim, rtol, atol, device)
