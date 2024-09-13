@@ -44,13 +44,8 @@ jobs:
       - name: Update submodules
         run: |
           git submodule update --init --recursive
-      - name: Determine Docker Image Tag
-        run: |
-          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
-            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-          else
-            echo "IMAGE_TAG=dev-${GITHUB_REF_NAME//\//-}" >> $GITHUB_ENV
-          fi
+      - name: Determine docker image tag
+        uses: ./.github/actions/generate-docker-tag
       - name: Docker login
         uses: docker/login-action@v3
         with:
@@ -60,7 +55,7 @@ jobs:
       - name: Build tt-metal and libs
         uses: addnab/docker-run-action@v3
         with:
-          image: ghcr.io/tenstorrent/tt-metal/tt-metalium/${{ inputs.os }}:${{ env.IMAGE_TAG }}
+          image: ${{ env.TT_METAL_DOCKER_IMAGE_TAG }}
           options:
             -u ${{ env.RUNNER_UID }}:${{ env.RUNNER_GID }}
             -v ${{ github.workspace }}:${{ github.workspace }}

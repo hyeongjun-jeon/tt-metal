@@ -37,14 +37,16 @@ jobs:
     with:
       from-precompiled: true
     secrets: inherit
-  build-artifact:
-    uses: ./.github/workflows/build-artifact.yaml
-    secrets: inherit
-  build-docker-image-2204:
+  build-docker-image-2004:
     uses: ./.github/workflows/build-docker-artifact.yaml
     secrets: inherit
     with:
       os: ubuntu-20.04-amd64
+  build-docker-image-2204:
+    uses: ./.github/workflows/build-docker-artifact.yaml
+    secrets: inherit
+    with:
+      os: ubuntu-22.04-amd64
   build-artifact:
     needs: build-docker-image-2004
     uses: ./.github/workflows/build-artifact.yaml
@@ -55,11 +57,6 @@ jobs:
     with:
       tracy: true
     secrets: inherit
-  build-docker-image-2204:
-    uses: ./.github/workflows/build-docker-artifact.yaml
-    secrets: inherit
-    with:
-      os: ubuntu-22.04-amd64
   # UMD Unit Tests
   umd-unit-tests:
     secrets: inherit
