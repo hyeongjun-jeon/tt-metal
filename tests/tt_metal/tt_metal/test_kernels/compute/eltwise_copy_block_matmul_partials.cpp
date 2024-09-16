@@ -21,7 +21,11 @@ void MAIN {
 
     constexpr uint32_t outer_loop = num_tiles / num_single_transfer;
 
+#ifdef DST_ACCUM_MODE
+    copy_tile_init();
+#else
     unary_op_init_common(in_cb_id, out_cb_id);
+#endif
 
     // Run the outer loop
     for(uint32_t b = 0; b < outer_loop; ++b) {
