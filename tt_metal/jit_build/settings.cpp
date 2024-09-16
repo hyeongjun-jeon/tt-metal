@@ -23,10 +23,10 @@ namespace tt::tt_metal
         path = build_env.get_out_kernel_root_path() + n;
     }
 
-    void JitBuildOptions::set_hlk_file_name_all_cores(std::string file_name)
-    {
-        hlk_desc.set_hlk_file_name(file_name);
-    }
+    // void JitBuildOptions::set_hlk_file_name_all_cores(std::string file_name)
+    // {
+    //     hlk_desc.set_hlk_file_name(file_name);
+    // }
 
     void JitBuildOptions::set_hlk_math_fidelity_all_cores(MathFidelity math_fidelity)
     {
