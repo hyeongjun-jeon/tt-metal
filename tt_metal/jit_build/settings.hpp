@@ -6,8 +6,6 @@
 
 #include <map>
 
-#include "common/core_coord.h"
-#include "common/utils.hpp"
 #include "hlk_desc.hpp"
 #include "hostdevcommon/kernel_structs.h"
 
@@ -28,15 +26,6 @@ class JitBuildOptions {
     // We can keep for future WH support, otherwise not used in GS
     bool fp32_dest_acc_en;
     bool preserve_fp32_precision;
-
-    // BRISC config
-    // std::string brisc_kernel_file_name;
-
-    // NCRISC config
-    // std::string ncrisc_kernel_file_name;
-
-    // ERISC config
-    // std::string erisc_kernel_file_name;
 
     std::map<std::string, std::string> hlk_defines;  // preprocessor defines for HLK
     std::map<std::string, std::string> ncrisc_defines;
