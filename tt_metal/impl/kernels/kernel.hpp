@@ -60,6 +60,8 @@ class Kernel : public JitBuildSettings {
 
     std::string name() const;
 
+    const KernelSource &kernel_source() const { return kernel_src_; }
+
     const CoreRangeSet &core_range_set() const { return core_range_set_; }
 
     const std::set<CoreCoord> &logical_cores() const;

@@ -23,7 +23,6 @@ class tt_hlk_desc {
     MathFidelity math_fidelity;
     bool approximation_mode;
 
-    // std::string hlk_file_name;  // HLK kernel file name (user writes)
     void* hlk_args;        // void ptr to user-defined hlk_args_t struct (user writes)
     size_t hlk_args_size;  // size of hlk_args_t in bytes (result of sizeof())
 
@@ -35,7 +34,6 @@ class tt_hlk_desc {
 
     tt_hlk_desc() {
         math_fidelity = MathFidelity::Invalid;
-        // hlk_file_name = "";
         hlk_args = nullptr;
         hlk_args_size = 0;
         approximation_mode = true;
@@ -57,7 +55,6 @@ class tt_hlk_desc {
         }
 
         math_fidelity = in.math_fidelity;
-        // hlk_file_name = in.hlk_file_name;
         hlk_args = in.hlk_args;
         hlk_args_size = in.hlk_args_size;
         approximation_mode = in.approximation_mode;
@@ -93,16 +90,6 @@ class tt_hlk_desc {
     }
 
     void* get_hlk_args() const { return hlk_args; }
-
-    // void set_hlk_file_name(std::string file_name)
-    // {
-    //     hlk_file_name = file_name;
-    // }
-
-    // const std::string & get_hlk_file_name() const
-    // {
-    //     return hlk_file_name;
-    // }
 
     void set_hlk_math_fidelity(MathFidelity math_fi) { math_fidelity = math_fi; }
 
