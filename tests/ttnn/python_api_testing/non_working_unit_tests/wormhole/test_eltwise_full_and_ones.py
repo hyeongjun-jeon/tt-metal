@@ -67,6 +67,33 @@ def run_ones_tests(input_shape, dtype, dlayout, in_mem_config, output_mem_config
     assert_with_pcc(ref_value, tt_result, 0.99)
 
 
+def run_abs_tests(input_shape, dtype, dlayout, in_mem_config, output_mem_config, data_seed, device):
+    torch.manual_seed(data_seed)
+
+    x = torch.Tensor(size=input_shape[0]).uniform_(-100, 100).to(torch.bfloat16)
+
+    try:
+        # get ref result
+        ref_value = torch.abs(x)
+
+        tt_result = ttnn_ops.abs(
+            x,
+            device=device,
+            dtype=dtype,
+            layout=dlayout,
+            input_mem_config=in_mem_config,
+            output_mem_config=output_mem_config,
+        )
+
+    except Exception as e:
+        logger.warning(f"Operation execution crashed")
+        raise e
+
+    assert len(tt_result.shape) == len(ref_value.shape)
+    assert tt_result.shape == ref_value.shape
+    assert_with_pcc(ref_value, tt_result, 0.99)
+
+
 test_sweep_args = [
     (
         [(4, 7, 21, 133)],
@@ -94,3 +121,11 @@ def test_eltwise_full(input_shape, dtype, dlayout, in_mem_config, output_mem_con
 )
 def test_eltwise_ones(input_shape, dtype, dlayout, in_mem_config, output_mem_config, data_seed, fill_value, device):
     run_ones_tests(input_shape, dtype, dlayout, in_mem_config, output_mem_config, data_seed, device)
+
+
+@pytest.mark.parametrize(
+    "input_shape, dtype, dlayout, in_mem_config, output_mem_config, data_seed, fill_value",
+    (test_sweep_args),
+)
+def test_eltwise_abs(input_shape, dtype, dlayout, in_mem_config, output_mem_config, data_seed, fill_value, device):
+    run_abs_tests(input_shape, dtype, dlayout, in_mem_config, output_mem_config, data_seed, device)
