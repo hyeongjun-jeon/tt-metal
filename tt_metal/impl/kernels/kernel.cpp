@@ -308,11 +308,9 @@ void DataMovementKernel::set_build_options(JitBuildOptions &build_options) const
     ZoneScoped;
     switch (this->config_.processor) {
         case DataMovementProcessor::RISCV_0: {
-            // build_options.brisc_kernel_file_name = this->kernel_path_file_name_;
             build_options.brisc_defines = this->defines_;
         } break;
         case DataMovementProcessor::RISCV_1: {
-            // build_options.ncrisc_kernel_file_name = this->kernel_path_file_name_;
             build_options.ncrisc_defines = this->defines_;
         } break;
         default: TT_THROW("Unsupported data movement processor!"); break;
@@ -320,12 +318,10 @@ void DataMovementKernel::set_build_options(JitBuildOptions &build_options) const
 }
 
 void EthernetKernel::set_build_options(JitBuildOptions &build_options) const {
-    // build_options.erisc_kernel_file_name = this->kernel_path_file_name_;
     build_options.erisc_defines = this->defines_;
 }
 
 void ComputeKernel::set_build_options(JitBuildOptions &build_options) const {
-    // build_options.set_hlk_file_name_all_cores(this->kernel_path_file_name_);
     build_options.set_hlk_math_fidelity_all_cores(this->config_.math_fidelity);
     build_options.set_hlk_math_approx_mode_all_cores(this->config_.math_approx_mode);
     build_options.fp32_dest_acc_en = this->config_.fp32_dest_acc_en;

@@ -42,7 +42,7 @@ struct KernelSource {
             const std::size_t pos_of_dot = this->source_.rfind(".");
             name = this->source_.substr(start_pos_of_name, (pos_of_dot - start_pos_of_name));
         } else {
-            name = "Kernel Source Code";
+            name = "Kernel_Source_Code";
         }
         return name;
     }
