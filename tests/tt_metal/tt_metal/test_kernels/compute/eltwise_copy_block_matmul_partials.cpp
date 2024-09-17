@@ -24,7 +24,8 @@ void MAIN {
 #ifdef DST_ACCUM_MODE
     copy_tile_init();
 #else
-    unary_op_init_common(in_cb_id, out_cb_id);
+    copy_tile_init();
+    // unary_op_init_common(in_cb_id, out_cb_id);
 #endif
 
     // Run the outer loop
@@ -32,7 +33,11 @@ void MAIN {
         // Wait for num_single_transfer tiles to be available in in_cb
         cb_wait_front(in_cb_id, num_single_transfer);
         // Acquire DEST reg for MATH/PACK
+#ifdef DST_ACCUM_MODE
+        acquire_dst(tt::DstMode::Full);
+#else
         acquire_dst(tt::DstMode::Half);
+#endif
         // Reserve out_cb space for num_single_transfer tiles
         cb_reserve_back(out_cb_id, num_single_transfer);
 
@@ -42,7 +47,11 @@ void MAIN {
         matmul_pack_tile(START_DST_TILE_ID, out_cb_id, num_single_transfer);
 
         // Release DEST reg marking compute/pack complete
+#ifdef DST_ACCUM_MODE
+        release_dst(tt::DstMode::Full);
+#else
         release_dst(tt::DstMode::Half);
+#endif
         // Move rd ptr from in_cb by num_single_transfer places
         cb_pop_front(in_cb_id, num_single_transfer);
         // Move wr prt from out_cb by num_single_transfer places

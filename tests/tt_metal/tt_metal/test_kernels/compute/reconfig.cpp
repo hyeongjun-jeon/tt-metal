@@ -20,7 +20,8 @@ void MAIN {
     constexpr auto cb_in0 = tt::CB::c_in0; // Bfp8_b
     constexpr auto cb_in1 = tt::CB::c_in1; // Bfp16_b
     constexpr auto cb_in2 = tt::CB::c_in2; // Bfp16_b
-    constexpr auto cb_out0 = tt::CB::c_out0; // Bfp16_b
+//     constexpr auto cb_out0 = tt::CB::c_out0; // Bfp16_b
+    constexpr auto cb_out0 = tt::CB::c_out0; // Fp32
     constexpr auto cb_out1 = tt::CB::c_out1; // Bfp8_b
 
 
@@ -41,6 +42,7 @@ void MAIN {
         // data inside CB_0, 2nd one inits it to Bfp16_b
         // which is inside CB_2
         copy_tile_init();
+        // This call will test copy_tile_to_dst_init_short as well
         copy_tile_to_dst_init_short_with_dt(cb_in0, cb_in2);
 
         cb_wait_front(cb_in2, ublock_size_tiles);

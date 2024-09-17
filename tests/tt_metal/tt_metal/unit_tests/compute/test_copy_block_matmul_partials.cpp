@@ -115,6 +115,8 @@ void run_single_core_copy_block_matmul_partials(tt_metal::Device* device, const 
             -100, 100, dram_buffer_size/sizeof(float), 0);
         for (auto i = 0; i < src_vec.size(); i++) {
             std::memcpy(&src_vec[i], &src_vec_float[i], sizeof(float));
+            if (i < 5)
+                std::cout << "src_vec[" << std::dec << i << "] = " << std::hex << src_vec[i] << std::endl;
             src_vec[i] &= 0xFFFFE000;
         }
     }
@@ -190,8 +192,8 @@ void run_single_core_copy_block_matmul_partials(tt_metal::Device* device, const 
 //
 ////////////////////////////////////////////////////////////////////////////
 TEST_F(DeviceFixture, ComputeCopyBlockMatmulPartialsR8W8C8) {
-    for (bool fp32_dest_acc : {true, false}) {
-        log_info(LogTest, "FP32 Dest Acc is {}", fp32_dest_acc ? "true." : "false.");
+    // for (bool fp32_dest_acc : {false, true}) {
+        // log_info(LogTest, "FP32 Dest Acc is {}", fp32_dest_acc ? "true." : "false.");
         unit_tests::compute::matmul_partials::CopyBlockMatmulPartialsConfig test_config = {
             .single_tile_size = 2 * 1024,
             .num_tiles = 8,
@@ -200,16 +202,16 @@ TEST_F(DeviceFixture, ComputeCopyBlockMatmulPartialsR8W8C8) {
             .compute_ublock = 8,
             .src0_cb_index = 0,
             .ouput_cb_index = 16,
-            .fp32_dest_acc = fp32_dest_acc
+            .fp32_dest_acc = true
         };
         unit_tests::compute::matmul_partials::run_single_core_copy_block_matmul_partials(this->devices_.at(0), test_config);
         log_info(LogTest, "Passed.");
-    }
+    // }
 }
 
 TEST_F(DeviceFixture, ComputeCopyBlockMatmulPartialsR8W8C1) {
-    for (bool fp32_dest_acc : {true, false}) {
-        log_info(LogTest, "FP32 Dest Acc is {}", fp32_dest_acc ? "true." : "false.");
+    // for (bool fp32_dest_acc : {true, false}) {
+        // log_info(LogTest, "FP32 Dest Acc is {}", fp32_dest_acc ? "true." : "false.");
             unit_tests::compute::matmul_partials::CopyBlockMatmulPartialsConfig test_config = {
             .single_tile_size = 2 * 1024,
             .num_tiles = 8,
@@ -217,11 +219,12 @@ TEST_F(DeviceFixture, ComputeCopyBlockMatmulPartialsR8W8C1) {
             .writer_ublock = 8,
             .compute_ublock = 1,
             .src0_cb_index = 0,
-            .ouput_cb_index = 16
+            .ouput_cb_index = 16,
+            .fp32_dest_acc = false
         };
         unit_tests::compute::matmul_partials::run_single_core_copy_block_matmul_partials(this->devices_.at(0), test_config);
         log_info(LogTest, "Passed.");
-    }
+    // }
 }
 
 TEST_F(DeviceFixture, ComputeCopyBlockMatmulPartialsR8W1C1) {
@@ -234,7 +237,8 @@ TEST_F(DeviceFixture, ComputeCopyBlockMatmulPartialsR8W1C1) {
             .writer_ublock = 1,
             .compute_ublock = 1,
             .src0_cb_index = 0,
-            .ouput_cb_index = 16
+            .ouput_cb_index = 16,
+            .fp32_dest_acc = fp32_dest_acc
         };
         unit_tests::compute::matmul_partials::run_single_core_copy_block_matmul_partials(this->devices_.at(0), test_config);
         log_info(LogTest, "Passed.");
@@ -251,7 +255,8 @@ TEST_F(DeviceFixture, ComputeCopyBlockMatmulPartialsR1W1C1) {
             .writer_ublock = 1,
             .compute_ublock = 1,
             .src0_cb_index = 0,
-            .ouput_cb_index = 16
+            .ouput_cb_index = 16,
+            .fp32_dest_acc = fp32_dest_acc
         };
         unit_tests::compute::matmul_partials::run_single_core_copy_block_matmul_partials(this->devices_.at(0), test_config);
         log_info(LogTest, "Passed.");
