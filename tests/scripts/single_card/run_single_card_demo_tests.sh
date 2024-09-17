@@ -56,6 +56,9 @@ run_n300_func_tests() {
 
   run_common_func_tests; fail+=$?
 
+  # Squeezebert
+  WH_ARCH_YAML=wormhole_b0_80_arch_eth_dispatch.yaml pytest -n auto --disable-warnings --input-path='models/experimental/functional_squeezebert/demo/input_data.json' models/experimental/functional_squeezebert/demo/demo.py; fail+=$?
+
   if [[ $fail -ne 0 ]]; then
     exit 1
   fi
