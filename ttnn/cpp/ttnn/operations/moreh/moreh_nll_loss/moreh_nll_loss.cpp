@@ -16,14 +16,14 @@ namespace ttnn::operations::moreh::moreh_nll_loss {
 Tensor MorehNllLoss::invoke(
     const Tensor &input_tensor,
     const Tensor &target_tensor,
-    const bool reduction_mean,
+    const uint32_t reduction_mode,
     const std::optional<const Tensor> weight_tensor,
     const std::optional<const Tensor> divisor_tensor,
     const std::optional<const Tensor> output_tensor,
     const int32_t ignore_index,
     const std::optional<ttnn::MemoryConfig> &memory_config,
     std::optional<const ttnn::DeviceComputeKernelConfig> compute_kernel_config) {
-    if (reduction_mean) {
+    if (reduction_mode == MEAN) {
         TT_ASSERT(divisor_tensor.has_value());
 
         auto input_shape = input_tensor.get_legacy_shape();
@@ -34,7 +34,7 @@ Tensor MorehNllLoss::invoke(
             target_tensor,
             weight_tensor,
             ignore_index,
-            reduction_mean,
+            reduction_mode,
             output_dtype,
             channel_size,
             memory_config,
@@ -46,7 +46,7 @@ Tensor MorehNllLoss::invoke(
         const Tensor &step2_result = prim::moreh_nll_loss_step2(
             input_tensor,
             target_tensor,
-            reduction_mean,
+            reduction_mode,
             weight_tensor,
             divisor_tensor,
             output_tensor,
@@ -54,11 +54,11 @@ Tensor MorehNllLoss::invoke(
             memory_config,
             compute_kernel_config);
         return ttnn::moreh_sum(step2_result, std::nullopt, false, output_tensor, memory_config, compute_kernel_config);
-    } else {
+    } else if (reduction_mode == SUM) {
         const Tensor &step2_result = prim::moreh_nll_loss_step2(
             input_tensor,
             target_tensor,
-            reduction_mean,
+            reduction_mode,
             weight_tensor,
             std::nullopt,
             output_tensor,
@@ -68,6 +68,17 @@ Tensor MorehNllLoss::invoke(
 
         return ttnn::moreh_sum(step2_result, std::nullopt, false, output_tensor, memory_config, compute_kernel_config);
     }
+
+    return prim::moreh_nll_loss_step2(
+        input_tensor,
+        target_tensor,
+        reduction_mode,
+        weight_tensor,
+        std::nullopt,
+        output_tensor,
+        ignore_index,
+        memory_config,
+        compute_kernel_config);
 }
 
 }  // namespace ttnn::operations::moreh::moreh_nll_loss

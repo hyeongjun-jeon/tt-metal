@@ -149,19 +149,12 @@ def run_moreh_nll_loss_unreduced(shape, ignore_index, none_weight, device, compu
         torch_input, torch_target, torch_weight, torch_output, device
     )
 
-    # tt_loss = ttnn.experimental.operations.primary.moreh_nll_loss_unreduced(
-    #     tt_input,
-    #     tt_target,
-    #     tt_weight,
-    #     tt_output,
-    #     ignore_index,
-    #     compute_kernel_config=compute_kernel_config,
-    # )
+    reduction_mode = 0  # none
 
     tt_loss = ttnn.moreh_nll_loss(
         tt_input,
         tt_target,
-        False,
+        reduction_mode,
         weight_tensor=tt_weight,
         divisor_tensor=None,
         output_tensor=tt_output,
@@ -173,8 +166,6 @@ def run_moreh_nll_loss_unreduced(shape, ignore_index, none_weight, device, compu
 
     rtol = atol = 0.05
     passing, out = comp_allclose_and_pcc(torch_loss, tt_loss_to_cpu, pcc=0.999, rtol=rtol, atol=atol)
-    print("CPU output: ", torch_loss)
-    print("NPU output: ", tt_loss_to_cpu)
     logger.debug(f"Out passing (param)={passing}")
     logger.debug(f"Output pcc={out}")
 
@@ -185,13 +176,12 @@ def run_moreh_nll_loss_unreduced(shape, ignore_index, none_weight, device, compu
     "shape",
     [
         (5, 10),
-        # (500, 100),
-        # (4, 3, 2, 4, 50, 70),
+        (500, 100),
+        (4, 3, 2, 4, 50, 70),
     ],
 )
 @pytest.mark.parametrize("ignore_index", [1])
-# @pytest.mark.parametrize("none_weight", [True, False])
-@pytest.mark.parametrize("none_weight", [False])
+@pytest.mark.parametrize("none_weight", [True, False])
 @pytest.mark.parametrize("compute_kernel_options", compute_kernel_options, ids=compute_kernel_ids)
 def test_moreh_nll_loss_unreduced(shape, ignore_index, none_weight, compute_kernel_options, device, use_program_cache):
     torch.manual_seed(0)
@@ -201,19 +191,19 @@ def test_moreh_nll_loss_unreduced(shape, ignore_index, none_weight, compute_kern
     )
 
 
-# @pytest.mark.parametrize(
-#     "shape",
-#     [
-#         (5, 10),
-#         (5, 10, 10),
-#         (5, 10, 10, 20),
-#     ],
-# )
-# @pytest.mark.parametrize("none_weight", [True, False])
-# def test_moreh_nll_loss_unreduced_callback(shape, none_weight, device, use_program_cache):
-#     torch.manual_seed(0)
+@pytest.mark.parametrize(
+    "shape",
+    [
+        (5, 10),
+        (5, 10, 10),
+        (5, 10, 10, 20),
+    ],
+)
+@pytest.mark.parametrize("none_weight", [True, False])
+def test_moreh_nll_loss_unreduced_callback(shape, none_weight, device, use_program_cache):
+    torch.manual_seed(0)
 
-#     ignore_index = 1
+    ignore_index = 1
 
-#     for _ in range(2):
-#         run_moreh_nll_loss_unreduced(shape, ignore_index, none_weight, device)
+    for _ in range(2):
+        run_moreh_nll_loss_unreduced(shape, ignore_index, none_weight, device)

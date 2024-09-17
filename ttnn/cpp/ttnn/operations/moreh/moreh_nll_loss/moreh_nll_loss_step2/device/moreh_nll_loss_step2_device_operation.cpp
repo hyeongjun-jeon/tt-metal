@@ -124,7 +124,7 @@ std::tuple<MorehNllLossStep2DeviceOperation::operation_attributes_t, MorehNllLos
 MorehNllLossStep2DeviceOperation::invoke(
     const Tensor& input_tensor,
     const Tensor& target_tensor,
-    const bool reduction_mean,
+    const uint32_t reduction_mode,
     const std::optional<const Tensor> weight_tensor,
     const std::optional<const Tensor> divisor_tensor,
     const std::optional<const Tensor> output_tensor,
@@ -133,7 +133,7 @@ MorehNllLossStep2DeviceOperation::invoke(
     std::optional<const ttnn::DeviceComputeKernelConfig> compute_kernel_config) {
     return {
         operation_attributes_t{
-            reduction_mean,
+            reduction_mode,
             ignore_index < 0 ? std::numeric_limits<uint32_t>::max() : ignore_index,
             memory_config.value_or(input_tensor.memory_config()),
             compute_kernel_config},

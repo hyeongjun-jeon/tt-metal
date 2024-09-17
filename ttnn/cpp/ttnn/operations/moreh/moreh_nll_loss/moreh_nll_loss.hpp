@@ -10,11 +10,17 @@
 
 namespace ttnn::operations::moreh::moreh_nll_loss {
 
+enum reduction_enum {
+    NONE,
+    SUM,
+    MEAN,
+};
+
 struct MorehNllLoss {
     static Tensor invoke(
         const Tensor &input_tensor,
         const Tensor &target_tensor,
-        const bool reduction_mean,
+        const uint32_t reduction_mode,
         const std::optional<const Tensor> weight_tensor,
         const std::optional<const Tensor> divisor_tensor,
         const std::optional<const Tensor> output_tensor,
@@ -26,7 +32,6 @@ struct MorehNllLoss {
 }  // namespace ttnn::operations::moreh::moreh_nll_loss
 
 namespace ttnn {
-constexpr auto moreh_nll_loss = ttnn::register_operation_with_auto_launch_op<
-    "ttnn::moreh_nll_loss",
-    operations::moreh::moreh_nll_loss::MorehNllLoss>();
+constexpr auto moreh_nll_loss = ttnn::
+    register_operation_with_auto_launch_op<"ttnn::moreh_nll_loss", operations::moreh::moreh_nll_loss::MorehNllLoss>();
 }  // namespace ttnn

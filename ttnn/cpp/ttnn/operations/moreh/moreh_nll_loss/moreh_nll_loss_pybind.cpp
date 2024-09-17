@@ -23,7 +23,7 @@ void bind_moreh_nll_loss_operation(py::module &module) {
         ttnn::pybind_arguments_t{
             py::arg("input_tensor"),
             py::arg("target_tensor"),
-            py::arg("reduction_mean"),
+            py::arg("reduction_mode"),
             py::kw_only(),
             py::arg("weight_tensor") = std::nullopt,
             py::arg("divisor_tensor") = std::nullopt,

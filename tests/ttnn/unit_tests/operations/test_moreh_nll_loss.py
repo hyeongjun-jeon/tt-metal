@@ -61,35 +61,30 @@ def run_moreh_nll_loss(shape, ignore_index, reduction, none_weight, device, comp
         torch_input, torch_target, torch_weight, torch_divisor, torch_output, device
     )
 
-    reduction_mean = reduction == "mean"
+    assert reduction in ["sum", "mean"]
+    if reduction == "sum":
+        reduction_mode = 1
+    else:
+        reduction_mode = 2
+
     tt_loss = ttnn.moreh_nll_loss(
         tt_input,
         tt_target,
-        reduction_mean,
+        reduction_mode,  # reduction_mean,
         weight_tensor=tt_weight,
         divisor_tensor=tt_divisor,
         output_tensor=tt_output,
         ignore_index=ignore_index,
         compute_kernel_config=compute_kernel_config,
     )
-    # tt_loss = ttnn.experimental.operations.primary.moreh_nll_loss(
-    #     tt_input,
-    #     tt_target,
-    #     tt_weight,
-    #     tt_divisor,
-    #     tt_output,
-    #     ignore_index,
-    #     reduction_mean,
-    #     compute_kernel_config=compute_kernel_config,
-    # )
 
     tt_loss_to_cpu = to_cpu(tt_loss, [1])
     rtol = atol = 0.05
     passing, out = comp_allclose_and_pcc(torch_loss, tt_loss_to_cpu, pcc=0.999, rtol=rtol, atol=atol)
     tt_divisor_to_cpu = to_cpu(tt_divisor, tt_divisor.shape)
-    print("Divisor: ", tt_divisor_to_cpu)
-    print("CPU output: ", torch_loss)
-    print("NPU output: ", tt_loss_to_cpu)
+    # print("Divisor: ", tt_divisor_to_cpu)
+    # print("CPU output: ", torch_loss)
+    # print("NPU output: ", tt_loss_to_cpu)
     logger.debug(f"Out passing (param)={passing}")
     logger.debug(f"Output pcc={out}")
     assert passing
@@ -162,9 +157,7 @@ def run_moreh_nll_loss_backward(shape, ignore_index, reduction_mean, none_weight
 )
 @pytest.mark.parametrize("ignore_index", [1])
 @pytest.mark.parametrize("reduction", ["mean", "sum"])
-# @pytest.mark.parametrize("reduction", ["mean"])
 @pytest.mark.parametrize("none_weight", [True, False])
-# @pytest.mark.parametrize("none_weight", [False])
 def test_moreh_nll_loss(shape, ignore_index, reduction, none_weight, device):
     torch.manual_seed(0)
 
@@ -180,7 +173,6 @@ def test_moreh_nll_loss(shape, ignore_index, reduction, none_weight, device):
     ],
 )
 @pytest.mark.parametrize("reduction", ["mean", "sum"])
-# @pytest.mark.parametrize("reduction", ["sum"])
 @pytest.mark.parametrize("none_weight", [True, False])
 def test_moreh_nll_loss_callback(shape, reduction, none_weight, device, use_program_cache):
     torch.manual_seed(0)
@@ -203,7 +195,6 @@ def test_moreh_nll_loss_callback(shape, reduction, none_weight, device, use_prog
 )
 @pytest.mark.parametrize("ignore_index", [1])
 @pytest.mark.parametrize("reduction", ["mean", "sum"])
-# @pytest.mark.parametrize("reduction", ["sum"])
 @pytest.mark.parametrize("none_weight", [True, False])
 @pytest.mark.parametrize("compute_kernel_options", compute_kernel_options, ids=compute_kernel_ids)
 def test_moreh_nll_loss_compute_kernel_options(
