@@ -168,6 +168,9 @@ void JitBuildState::finish_init() {
     // Append hw build objects compiled offline
     std::string build_dir = llrt::OptionsG.get_root_dir() + "runtime/hw/lib/";
     if (this->is_fw_) {
+        if (this->target_name_ == "brisc") {
+            this->link_objs_ += build_dir + "tdma_xmov.o ";
+        }
         if (this->target_name_ != "erisc") {
             this->link_objs_ += build_dir + "tmu-crt0.o ";
         }
@@ -212,7 +215,6 @@ JitBuildDataMovement::JitBuildDataMovement(const JitBuildEnv& env, int which, bo
                 this->defines_ += "-DDISABLE_L1_DATA_CACHE ";
             }
 
-            this->srcs_.push_back("tt_metal/hw/firmware/src/tdma_xmov.c");
             this->srcs_.push_back("tt_metal/hw/firmware/src/" + env_.aliased_arch_name_ + "/noc.c");
             if (this->is_fw_) {
                 this->srcs_.push_back("tt_metal/hw/firmware/src/brisc.cc");
