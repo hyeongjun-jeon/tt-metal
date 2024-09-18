@@ -19,8 +19,8 @@ void py_bind_sdpa_decode(py::module &module) {
         "The implementation is Flash-Decode and it currently only supports MQA on decoding single token.\n"
 
         "Q:      [1 x b x pnh x dh]"
-        "K:      [1 x b x   s x dh]"
-        "V:      [1 x b x   s x dh]"
+        "K:      [b x 1 x   s x dh]"
+        "V:      [b x 1 x   s x dh]"
         "cur_pos: list of integers of length b"
         "cur_pos_tensor: [b] tensor of integers of length b"
         "output: [1 x b x pnh x dh]"
