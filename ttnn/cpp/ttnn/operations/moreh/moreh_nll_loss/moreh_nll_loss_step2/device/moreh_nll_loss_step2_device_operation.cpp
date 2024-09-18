@@ -69,7 +69,7 @@ void MorehNllLossStep2DeviceOperation::validate_on_program_cache_hit(
 MorehNllLossStep2DeviceOperation::shape_return_value_t MorehNllLossStep2DeviceOperation::compute_output_shapes(
     const operation_attributes_t& operation_attributes, const tensor_args_t& tensor_args) {
     const auto& input_tensor = tensor_args.input_tensor;
-    auto input_shape = input_tensor.get_legacy_shape();
+    auto input_shape = input_tensor.get_shape().value;
     auto input_shape_without_padding = input_shape.without_padding();
     auto input_rank = input_shape.rank();
 

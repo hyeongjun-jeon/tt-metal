@@ -7,6 +7,7 @@
 
 #include <optional>
 
+// #include "common/assert.hpp"
 #include "moreh_nll_loss_helper.hpp"
 #include "moreh_nll_loss_step1/device/moreh_nll_loss_step1_device_operation.hpp"
 #include "moreh_nll_loss_step2/device/moreh_nll_loss_step2_device_operation.hpp"
@@ -25,9 +26,9 @@ Tensor MorehNllLoss::invoke(
     const std::optional<ttnn::MemoryConfig> &memory_config,
     std::optional<const ttnn::DeviceComputeKernelConfig> compute_kernel_config) {
     if (reduction_mode == MEAN) {
-        TT_ASSERT(divisor_tensor.has_value());
+        TT_FATAL(divisor_tensor.has_value(), "Divisor tensor must not be empty");
 
-        auto input_shape = input_tensor.get_legacy_shape();
+        auto input_shape = input_tensor.get_shape().value;
         const uint32_t channel_size = input_shape[1];
         auto output_dtype = output_tensor.has_value() ? output_tensor.value().get_dtype() : input_tensor.get_dtype();
 

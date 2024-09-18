@@ -29,7 +29,7 @@ MorehNllLossStep1DeviceOperation::Factory::cached_program_t MorehNllLossStep1Dev
     const uint32_t channel_size = operation_attributes.channel_size;
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config = operation_attributes.compute_kernel_config;
 
-    auto target_shape = target.get_legacy_shape();
+    auto target_shape = target.get_shape().value;
     auto N = target_shape[1];
 
     const auto target_shape_without_padding = target_shape.without_padding();
