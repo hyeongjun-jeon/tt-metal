@@ -374,9 +374,7 @@ def run_llama_demo(user_input, batch_size, device, instruct_mode, is_ci_env, num
                     if iteration > 0 and embed_on_device:  # host-embedded for iteration 0
                         decode_input = tt_embd(pt_encoded_input)
                     intermediate_out = tt_model(decode_input, current_pos, rot_mat=current_rot_mat)
-                    intermediate_out = ttnn.untilize(
-                        intermediate_out, use_multicore=False
-                    )  # multi-core OOMs (https://github.com/tenstorrent/tt-metal/issues/9022)
+                    intermediate_out = ttnn.untilize(intermediate_out, use_multicore=True)
                     # ensure persistent device in/out buffers are in DRAM
                     device_tt_out = ttnn.to_memory_config(intermediate_out, ttnn.DRAM_MEMORY_CONFIG)
                     ttnn.deallocate(intermediate_out, force=True)
