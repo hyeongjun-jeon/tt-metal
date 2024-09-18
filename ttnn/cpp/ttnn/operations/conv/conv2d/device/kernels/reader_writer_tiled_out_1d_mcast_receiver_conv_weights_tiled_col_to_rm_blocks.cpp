@@ -107,11 +107,11 @@ void kernel_main() {
         .data_format = out_df
     };
 
-    // read in bias if enabled (done only once for all batches)
-    #ifdef FUSE_BIAS
+// read in bias if enabled (done only once for all batches)
+#ifdef FUSE_BIAS
     constexpr uint32_t bias_cb_id = get_compile_time_arg_val(3);
     bool load_bias = true;
-    #endif
+#endif
 
 
     // OUTER most loop is looping over out blocks in width dim because blocks from compute are in col major order.
@@ -141,43 +141,42 @@ void kernel_main() {
                     local_packed_reader_indices[i] = packed_reader_indices_ptr[start_reader_idx+i];
                 }
             }
-            if (read_weights) {
 
                 // TODO: Not sure how this loop works with the additional reader; we don't have a use case for this right now
                 for(uint32_t weight_tile_h_outer_i = 0; weight_tile_h_outer_i < weight_block_height_num_outer; weight_tile_h_outer_i++) {
 
-                    uint32_t reader_offset = act_l1_read_addr;
+                uint32_t reader_offset = act_l1_read_addr;
                     for(uint32_t block_weight_h = 0; block_weight_h < num_blocks_weight_h; block_weight_h++) {
-                        // Do the second half of the reads for act
-                        noc_async_read_one_packet_set_state(get_noc_addr(act_l1_read_addr), coalesced_read_bytes);
-                        reader_idx = start_reader_idx;
-                        cb_reserve_back(cb_id_act_second_reader, act_block_num_tiles_read);
-                        uint32_t l1_write_addr_act = get_write_ptr(cb_id_act_second_reader);
+                    // Do the second half of the reads for act
+                    noc_async_read_one_packet_set_state(get_noc_addr(act_l1_read_addr), coalesced_read_bytes);
+                    reader_idx = start_reader_idx;
+                    cb_reserve_back(cb_id_act_second_reader, act_block_num_tiles_read);
+                    uint32_t l1_write_addr_act = get_write_ptr(cb_id_act_second_reader);
                         uint32_t act_block_h_datums_read_curr = bh == out_num_blocks_h - 1 ? act_block_h_datums_read_last_block : act_block_h_datums_read;
-                        for (uint32_t bhd = 0; bhd < act_block_h_datums_read_curr; bhd++) {
-                            // local read from reader_index + reader_offset;
+                    for (uint32_t bhd = 0; bhd < act_block_h_datums_read_curr; bhd++) {
+                        // local read from reader_index + reader_offset;
                             uint32_t two_reader_indices = cache_packed_reader_indices ? local_packed_reader_indices[bhd] : packed_reader_indices_ptr[reader_idx];
-                            uint32_t reader_idx_1 = two_reader_indices & 0xffff;
-                            uint32_t reader_idx_2 = two_reader_indices >> 16;
+                        uint32_t reader_idx_1 = two_reader_indices & 0xffff;
+                        uint32_t reader_idx_2 = two_reader_indices >> 16;
 
-                            act_l1_offset = reader_offset + (reader_idx_1 * conv_act_size_c_bytes);
-                            noc_async_read_one_packet_with_state<true>(act_l1_offset, l1_write_addr_act);
-                            l1_write_addr_act += (coalesced_read_bytes + act_block_w_extra_align_bytes);
+                        act_l1_offset = reader_offset + (reader_idx_1 * conv_act_size_c_bytes);
+                        noc_async_read_one_packet_with_state<true>(act_l1_offset, l1_write_addr_act);
+                        l1_write_addr_act += (coalesced_read_bytes + act_block_w_extra_align_bytes);
 
-                            act_l1_offset = reader_offset + (reader_idx_2 * conv_act_size_c_bytes);
-                            noc_async_read_one_packet_with_state<true>(act_l1_offset, l1_write_addr_act);
-                            l1_write_addr_act += (coalesced_read_bytes + act_block_w_extra_align_bytes);
+                        act_l1_offset = reader_offset + (reader_idx_2 * conv_act_size_c_bytes);
+                        noc_async_read_one_packet_with_state<true>(act_l1_offset, l1_write_addr_act);
+                        l1_write_addr_act += (coalesced_read_bytes + act_block_w_extra_align_bytes);
 
-                            reader_idx++;
-                        }
-                        noc_async_read_barrier();
-                        cb_push_back(cb_id_act_second_reader, act_block_num_tiles_read);
+                        reader_idx++;
+                    }
+                    noc_async_read_barrier();
+                    cb_push_back(cb_id_act_second_reader, act_block_num_tiles_read);
 
-                        reader_offset += window_outer_offset;
+                    reader_offset += window_outer_offset;
 
-
-                        // Receive weights
-                        cb_reserve_back(cb_id_weight, weight_block_num_tiles);
+                    // Receive weights
+                    cb_reserve_back(cb_id_weight, weight_block_num_tiles);
+                    if (bh == 0) {
                         // Set weights semaphore value to INVALID
                         noc_semaphore_set(weights_mcast_receiver_semaphore_addr_ptr, INVALID);
 
@@ -186,51 +185,14 @@ void kernel_main() {
 
                         // wait on weights semaphore value to become VALID (set by mcast sender after it multicasts data)
                         noc_semaphore_wait(weights_mcast_receiver_semaphore_addr_ptr, VALID);
-
-                        cb_push_back(cb_id_weight, weight_block_num_tiles);
-                    } // for num_blocks_weight_h
-                } // for weight_block_height_num_outer
-
-                read_weights = false;
-            } else {
-                cb_reserve_back(cb_id_weight, total_weight_num_tiles);
-                cb_push_back(cb_id_weight, total_weight_num_tiles);
-
-                noc_async_read_one_packet_set_state(get_noc_addr(act_l1_read_addr), coalesced_read_bytes);
-                uint32_t reader_offset = act_l1_read_addr;
-                for(uint32_t weight_tile_h_outer_i = 0; weight_tile_h_outer_i < weight_block_height_num_outer; weight_tile_h_outer_i++) {
-                    for(uint32_t block_weight_h = 0; block_weight_h < num_blocks_weight_h; block_weight_h++) {
-                        reader_idx = start_reader_idx;
-
-                        // Do the second half of the reads for act
-                        cb_reserve_back(cb_id_act_second_reader, act_block_num_tiles_read);
-                        uint32_t l1_write_addr_act = get_write_ptr(cb_id_act_second_reader);
-                        uint32_t act_block_h_datums_read_curr = bh == out_num_blocks_h - 1 ? act_block_h_datums_read_last_block : act_block_h_datums_read;
-                        for (uint32_t bhd = 0; bhd < act_block_h_datums_read_curr; bhd++) {
-                            // local read from reader_index + reader_offset;
-                            uint32_t two_reader_indices = cache_packed_reader_indices ? local_packed_reader_indices[bhd] : packed_reader_indices_ptr[reader_idx];
-                            uint32_t reader_idx_1 = two_reader_indices & 0xffff;
-                            uint32_t reader_idx_2 = two_reader_indices >> 16;
-
-                            act_l1_offset = reader_offset + (reader_idx_1 * conv_act_size_c_bytes);
-                            noc_async_read_one_packet_with_state<true>(act_l1_offset, l1_write_addr_act);
-                            l1_write_addr_act += (coalesced_read_bytes + act_block_w_extra_align_bytes);
-
-                            act_l1_offset = reader_offset + (reader_idx_2 * conv_act_size_c_bytes);
-                            noc_async_read_one_packet_with_state<true>(act_l1_offset, l1_write_addr_act);
-                            l1_write_addr_act += (coalesced_read_bytes + act_block_w_extra_align_bytes);
-
-                            reader_idx++;
-                        }
-                        noc_async_read_barrier();
-                        cb_push_back(cb_id_act_second_reader, act_block_num_tiles_read);
-
-                        reader_offset += window_outer_offset;
                     }
-                }
+
+                    cb_push_back(cb_id_weight, weight_block_num_tiles);
+
+                }  // for weight_block_height_num_outer
             }
 
-            #ifdef FUSE_BIAS
+#ifdef FUSE_BIAS
             if (load_bias) {
                 cb_reserve_back(bias_cb_id, bias_ntiles);
 
@@ -246,9 +208,9 @@ void kernel_main() {
                 cb_push_back(bias_cb_id, bias_ntiles);
                 load_bias = false;
             }
-            #endif
+#endif
 
-            #ifndef SHARDED_OUT
+#ifndef SHARDED_OUT
             uint32_t out_sbh_start_tile_id = out_block_h_start_tile_id;
             uint32_t out_sbh_start_tile_id_h = out_block_h_start_tile_id_h; //
             for(uint32_t sbh = 0; sbh < out_num_subblocks_h; sbh++) {
@@ -291,7 +253,7 @@ void kernel_main() {
             } // out_num_subblocks_h
             out_block_h_start_tile_id += out_next_block_stride_h;
             out_block_h_start_tile_id_h += out_block_height_num_tiles;
-            #endif
+#endif
 
             start_reader_idx = reader_idx + act_block_h_datums_read;
         } // out_num_blocks_h
@@ -302,7 +264,7 @@ void kernel_main() {
         weight_start_tile_id += weight_next_block_stride_w;
     } // out_num_blocks_w
 
-    #ifdef SHARDED_OUT
+#ifdef SHARDED_OUT
     cb_wait_front(cb_id_out0, out_subblock_tile_count * out_num_subblocks_h * out_num_subblocks_w * out_num_blocks_w * out_num_blocks_h);
-    #endif
+#endif
 }
