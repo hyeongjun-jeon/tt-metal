@@ -114,14 +114,24 @@ def test_lm_head_matmul(mesh_device, use_program_cache, determinism_check_iterat
 @pytest.mark.parametrize(
     "mesh_device",
     [
-        pytest.param(1, id="_1chips"),
-        pytest.param(2, id="_2chips"),
-        pytest.param(8, id="_8chips"),
-        pytest.param((8, 4), id="_galaxy"),
+        pytest.param(1, id="1chips"),
+        pytest.param(2, id="2chips"),
+        pytest.param(8, id="8chips"),
+        pytest.param((8, 4), id="galaxy"),
     ],
     indirect=["mesh_device"],
 )
-def test_lm_head_matmul_on_single_chip(mesh_device, logical_chip_id, use_program_cache, determinism_check_iterations):
+def test_specific_chip_lm_head_matmul(mesh_device, logical_chip_id, use_program_cache, determinism_check_iterations):
     assert len(mesh_device.get_device_ids()) > logical_chip_id, "Not enough devices!"
 
     test_lm_head_matmul(mesh_device.get_device(logical_chip_id), use_program_cache, determinism_check_iterations)
+
+
+@pytest.mark.parametrize(
+    "board_mesh_device",
+    range(4),
+    ids=[f"board_id_{i}" for i in range(4)],
+    indirect=["board_mesh_device"],
+)
+def test_specific_board_lm_head_matmul(board_mesh_device, use_program_cache, determinism_check_iterations):
+    test_lm_head_matmul(board_mesh_device, use_program_cache, determinism_check_iterations)

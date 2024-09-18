@@ -10,12 +10,14 @@ from tests.didt.matmul_test_base import MatmulTestBase
 import ttnn
 
 NUM_ITERATIONS = 100000
+GELU_FIDELITY_PARAMETRIZATION = ((False, ttnn.MathFidelity.LoFi), (True, ttnn.MathFidelity.HiFi2))
+GELU_FIDELITY_PARAMETRIZATION_IDS = ["without_gelu", "with_gelu"]
 
 
 @pytest.mark.parametrize(
     "gelu, math_fidelity",
-    ((False, ttnn.MathFidelity.LoFi), (True, ttnn.MathFidelity.HiFi2)),
-    ids=["without_gelu", "with_gelu"],
+    GELU_FIDELITY_PARAMETRIZATION,
+    ids=GELU_FIDELITY_PARAMETRIZATION_IDS,
 )
 @pytest.mark.parametrize(
     "mesh_device",
@@ -91,8 +93,8 @@ def test_ff1_matmul(mesh_device, gelu, math_fidelity, use_program_cache, determi
 
 @pytest.mark.parametrize(
     "gelu, math_fidelity",
-    ((False, ttnn.MathFidelity.LoFi), (True, ttnn.MathFidelity.HiFi2)),
-    ids=["without_gelu", "with_gelu"],
+    GELU_FIDELITY_PARAMETRIZATION,
+    ids=GELU_FIDELITY_PARAMETRIZATION_IDS,
 )
 @pytest.mark.parametrize("logical_chip_id", range(32), ids=[f"logical_chip_{i}_" for i in range(32)])
 @pytest.mark.parametrize(
@@ -105,13 +107,36 @@ def test_ff1_matmul(mesh_device, gelu, math_fidelity, use_program_cache, determi
     ],
     indirect=["mesh_device"],
 )
-def test_ff1_matmul_on_single_chip(
+def test_specific_chip_ff1_matmul(
     mesh_device, logical_chip_id, gelu, math_fidelity, use_program_cache, determinism_check_iterations
 ):
     assert len(mesh_device.get_device_ids()) > logical_chip_id, "Not enough devices!"
 
     test_ff1_matmul(
         mesh_device.get_device(logical_chip_id),
+        gelu,
+        math_fidelity,
+        use_program_cache,
+        determinism_check_iterations,
+    )
+
+
+@pytest.mark.parametrize(
+    "gelu, math_fidelity",
+    GELU_FIDELITY_PARAMETRIZATION,
+    ids=GELU_FIDELITY_PARAMETRIZATION_IDS,
+)
+@pytest.mark.parametrize(
+    "board_mesh_device",
+    range(4),
+    ids=[f"board_id_{i}" for i in range(4)],
+    indirect=["board_mesh_device"],
+)
+def test_specific_board_ff1_matmul(
+    board_mesh_device, gelu, math_fidelity, use_program_cache, determinism_check_iterations
+):
+    test_ff1_matmul(
+        board_mesh_device,
         gelu,
         math_fidelity,
         use_program_cache,
