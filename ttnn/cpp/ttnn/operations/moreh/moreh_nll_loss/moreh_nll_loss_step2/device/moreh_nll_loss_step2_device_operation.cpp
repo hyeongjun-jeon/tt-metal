@@ -4,7 +4,6 @@
 
 #include "moreh_nll_loss_step2_device_operation.hpp"
 
-#include "ttnn/operations/moreh/moreh_nll_loss/moreh_nll_loss_helper.hpp"
 #include "ttnn/tensor/types.hpp"
 
 namespace ttnn::operations::moreh::moreh_nll_loss_step2 {

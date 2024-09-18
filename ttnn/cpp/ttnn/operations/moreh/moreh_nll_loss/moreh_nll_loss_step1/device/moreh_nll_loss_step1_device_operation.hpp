@@ -10,6 +10,7 @@
 #include "ttnn/decorators.hpp"
 #include "ttnn/device_operation.hpp"
 #include "ttnn/operations/core/compute_kernel/compute_kernel_config.hpp"
+#include "ttnn/operations/moreh/moreh_nll_loss/moreh_nll_loss_helper.hpp"
 #include "ttnn/tensor/tensor.hpp"
 #include "ttnn/tensor/types.hpp"
 #include "ttnn/types.hpp"
@@ -18,10 +19,10 @@ namespace ttnn::operations::moreh::moreh_nll_loss_step1 {
 
 struct MorehNllLossStep1DeviceOperation {
     struct operation_attributes_t {
-        const std::string reduction_mode;
+        const std::string reduction_mode = NONE;
         const uint32_t ignore_index = std::numeric_limits<uint32_t>::max();
         const DataType output_dtype;
-        const uint32_t channel_size;
+        const uint32_t channel_size = 1;
         const MemoryConfig memory_config;
         std::optional<const DeviceComputeKernelConfig> compute_kernel_config;
     };
