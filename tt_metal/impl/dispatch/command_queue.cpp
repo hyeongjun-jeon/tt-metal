@@ -1297,6 +1297,12 @@ void EnqueueProgramCommand::assemble_device_commands(
                 launch_msg_cmd_ptr->addr = eth_launch_message_addr;
             }
         }
+        go_msg_t run_program_go_signal;
+        // std::cout << "Program Cached: " << this->dispatch_core.x << " " << this->dispatch_core.y << std::endl;
+        run_program_go_signal.signal = RUN_MSG_GO;
+        run_program_go_signal.master_x = (uint8_t)this->dispatch_core.x;
+        run_program_go_signal.master_y = (uint8_t)this->dispatch_core.y;
+        cached_program_command_sequence.mcast_go_signal_cmd_ptr->go_signal =  *reinterpret_cast<uint32_t*>(&run_program_go_signal);
         cached_program_command_sequence.mcast_go_signal_cmd_ptr->wait_count = this->expected_num_workers_completed;
     }
 }
