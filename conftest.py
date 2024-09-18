@@ -435,6 +435,12 @@ def pytest_addoption(parser):
         help="Enable process timeout",
     )
     parser.addoption(
+        "--iterations",
+        action="store",
+        default=None,
+        help="Number of iterations to run",
+    )
+    parser.addoption(
         "--determinism-check-iterations",
         action="store",
         default=None,
@@ -445,11 +451,20 @@ def pytest_addoption(parser):
 @pytest.fixture
 def determinism_check_iterations(request):
     iterations = request.config.getoption("--determinism-check-iterations")
-    # we return 1 in case the option is not passed or the passed value is not valid
     if iterations is not None:
         # this will throw an error if bad value is passed
         return int(iterations)
     return -1
+
+
+@pytest.fixture
+def iterations(request):
+    iterations = request.config.getoption("--iterations")
+    if iterations is not None:
+        # this will throw an error if bad value is passed
+        return int(iterations)
+    # default is 100000
+    return 100000
 
 
 @pytest.fixture

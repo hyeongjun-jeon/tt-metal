@@ -9,8 +9,6 @@ import torch
 from tests.didt.matmul_test_base import MatmulTestBase
 import ttnn
 
-NUM_ITERATIONS = 100000
-
 
 class LMHeadTest(MatmulTestBase):
     def __init__(
@@ -63,7 +61,7 @@ class LMHeadTest(MatmulTestBase):
     ],
     indirect=["mesh_device"],
 )
-def test_lm_head_matmul(mesh_device, use_program_cache, determinism_check_iterations):
+def test_lm_head_matmul(mesh_device, iterations, determinism_check_iterations, use_program_cache):
     # Initialize input configurations
     in0_mem_config = ttnn.MemoryConfig(ttnn.TensorMemoryLayout.INTERLEAVED, ttnn.BufferType.L1)
     in1_mem_config = ttnn.MemoryConfig(ttnn.TensorMemoryLayout.INTERLEAVED, ttnn.BufferType.DRAM)
@@ -101,7 +99,7 @@ def test_lm_head_matmul(mesh_device, use_program_cache, determinism_check_iterat
         out_dtype=ttnn.DataType.BFLOAT8_B,
         program_config=program_config,
         compute_config=compute_config,
-        loop_count=NUM_ITERATIONS,
+        loop_count=iterations,
         determinism_check_enabled=True if determinism_check_iterations > 0 else False,
         determinism_check_iterations=determinism_check_iterations,
     )
@@ -121,10 +119,14 @@ def test_lm_head_matmul(mesh_device, use_program_cache, determinism_check_iterat
     ],
     indirect=["mesh_device"],
 )
-def test_specific_chip_lm_head_matmul(mesh_device, logical_chip_id, use_program_cache, determinism_check_iterations):
+def test_specific_chip_lm_head_matmul(
+    mesh_device, logical_chip_id, iterations, determinism_check_iterations, use_program_cache
+):
     assert len(mesh_device.get_device_ids()) > logical_chip_id, "Not enough devices!"
 
-    test_lm_head_matmul(mesh_device.get_device(logical_chip_id), use_program_cache, determinism_check_iterations)
+    test_lm_head_matmul(
+        mesh_device.get_device(logical_chip_id), iterations, determinism_check_iterations, use_program_cache
+    )
 
 
 @pytest.mark.parametrize(
@@ -133,5 +135,5 @@ def test_specific_chip_lm_head_matmul(mesh_device, logical_chip_id, use_program_
     ids=[f"board_id_{i}" for i in range(4)],
     indirect=["board_mesh_device"],
 )
-def test_specific_board_lm_head_matmul(board_mesh_device, use_program_cache, determinism_check_iterations):
-    test_lm_head_matmul(board_mesh_device, use_program_cache, determinism_check_iterations)
+def test_specific_board_lm_head_matmul(board_mesh_device, iterations, determinism_check_iterations, use_program_cache):
+    test_lm_head_matmul(board_mesh_device, iterations, determinism_check_iterations, use_program_cache)

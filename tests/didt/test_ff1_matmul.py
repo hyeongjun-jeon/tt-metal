@@ -9,7 +9,6 @@ import torch
 from tests.didt.matmul_test_base import MatmulTestBase
 import ttnn
 
-NUM_ITERATIONS = 100000
 GELU_FIDELITY_PARAMETRIZATION = ((False, ttnn.MathFidelity.LoFi), (True, ttnn.MathFidelity.HiFi2))
 GELU_FIDELITY_PARAMETRIZATION_IDS = ["without_gelu", "with_gelu"]
 
@@ -29,7 +28,7 @@ GELU_FIDELITY_PARAMETRIZATION_IDS = ["without_gelu", "with_gelu"]
     ],
     indirect=["mesh_device"],
 )
-def test_ff1_matmul(mesh_device, gelu, math_fidelity, use_program_cache, determinism_check_iterations):
+def test_ff1_matmul(mesh_device, gelu, math_fidelity, iterations, determinism_check_iterations, use_program_cache):
     # Initialize input configurations
     in0_block_shard_spec = ttnn.ShardSpec(
         ttnn.CoreRangeSet(
@@ -82,7 +81,7 @@ def test_ff1_matmul(mesh_device, gelu, math_fidelity, use_program_cache, determi
         out_dtype=ttnn.DataType.BFLOAT16,
         program_config=program_config,
         compute_config=compute_config,
-        loop_count=NUM_ITERATIONS,
+        loop_count=iterations,
         determinism_check_enabled=True if determinism_check_iterations > 0 else False,
         determinism_check_iterations=determinism_check_iterations,
     )
@@ -108,7 +107,7 @@ def test_ff1_matmul(mesh_device, gelu, math_fidelity, use_program_cache, determi
     indirect=["mesh_device"],
 )
 def test_specific_chip_ff1_matmul(
-    mesh_device, logical_chip_id, gelu, math_fidelity, use_program_cache, determinism_check_iterations
+    mesh_device, logical_chip_id, gelu, math_fidelity, use_program_cache, iterations, determinism_check_iterations
 ):
     assert len(mesh_device.get_device_ids()) > logical_chip_id, "Not enough devices!"
 
@@ -116,8 +115,9 @@ def test_specific_chip_ff1_matmul(
         mesh_device.get_device(logical_chip_id),
         gelu,
         math_fidelity,
-        use_program_cache,
+        iterations,
         determinism_check_iterations,
+        use_program_cache,
     )
 
 
@@ -133,12 +133,6 @@ def test_specific_chip_ff1_matmul(
     indirect=["board_mesh_device"],
 )
 def test_specific_board_ff1_matmul(
-    board_mesh_device, gelu, math_fidelity, use_program_cache, determinism_check_iterations
+    board_mesh_device, gelu, math_fidelity, iterations, determinism_check_iterations, use_program_cache
 ):
-    test_ff1_matmul(
-        board_mesh_device,
-        gelu,
-        math_fidelity,
-        use_program_cache,
-        determinism_check_iterations,
-    )
+    test_ff1_matmul(board_mesh_device, gelu, math_fidelity, iterations, determinism_check_iterations, use_program_cache)
