@@ -7,7 +7,7 @@ import pytest
 import torch
 
 import ttnn
-from models.utility_functions import is_wormhole_b0, torch_random, is_wormhole_b0, is_grayskull, is_blackhole
+from models.utility_functions import is_wormhole_b0, torch_random, is_wormhole_b0, is_grayskull, is_blackhole, divup
 from tests.ttnn.utils_for_testing import assert_with_pcc
 
 
@@ -192,9 +192,11 @@ def test_ttnn_matmul_dram_sharded(device, m_size, k_size, n_size):
     input_tensor_in0 = ttnn.to_memory_config(input_tensor_in0, sharded_mem_config)
 
     # in1 shard config
-    in1_shard_grid = ttnn.CoreCoord(device.dram_grid_size().x - 1, device.dram_grid_size().y - 1)
-    in1_shard_grid = ttnn.CoreRangeSet({ttnn.CoreRange(ttnn.CoreCoord(0, 0), in1_shard_grid)})
     in1_shard_shape = (8192, 96)
+    in1_shard_grid = ttnn.CoreCoord(
+        divup(torch_input_tensor_in1.shape[-1], in1_shard_shape[1]) - 1, device.dram_grid_size().y - 1
+    )
+    in1_shard_grid = ttnn.CoreRangeSet({ttnn.CoreRange(ttnn.CoreCoord(0, 0), in1_shard_grid)})
     in1_shard_spec = ttnn.ShardSpec(in1_shard_grid, in1_shard_shape, ttnn.ShardOrientation.ROW_MAJOR, False)
     in1_mem_config = ttnn.MemoryConfig(ttnn.TensorMemoryLayout.WIDTH_SHARDED, ttnn.BufferType.DRAM, in1_shard_spec)
     input_tensor_in1 = ttnn.from_torch(

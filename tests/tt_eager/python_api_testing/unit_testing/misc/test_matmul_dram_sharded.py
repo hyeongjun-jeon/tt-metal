@@ -5,7 +5,7 @@
 import pytest
 from loguru import logger
 from models.utility_functions import is_wormhole_b0, is_grayskull, skip_for_wormhole_b0
-from models.utility_functions import torch2tt_tensor, tt2torch_tensor, pad_by_zero, roundup32
+from models.utility_functions import torch2tt_tensor, tt2torch_tensor, pad_by_zero, roundup32, divup
 import torch
 import ttnn
 from tests.tt_eager.python_api_testing.sweep_tests.comparison_funcs import (
@@ -104,7 +104,7 @@ def run_test_matmul_in1_dram_sharded(
         buffer_type=ttnn.BufferType.L1,
     )
 
-    in1_shard_grid = ttnn.CoreCoord(device.dram_grid_size().x - 1, device.dram_grid_size().y - 1)
+    in1_shard_grid = ttnn.CoreCoord(divup(in1_shape[-1], in1_shard_shape[-1]) - 1, device.dram_grid_size().y - 1)
     in1_shard_grid = ttnn.CoreRangeSet({ttnn.CoreRange(ttnn.CoreCoord(0, 0), in1_shard_grid)})
     in1_shard_spec = ttnn.ShardSpec(in1_shard_grid, in1_shard_shape, ttnn.ShardOrientation.ROW_MAJOR, False)
     in1_mem_config = ttnn.MemoryConfig(ttnn.TensorMemoryLayout.WIDTH_SHARDED, ttnn.BufferType.DRAM, in1_shard_spec)

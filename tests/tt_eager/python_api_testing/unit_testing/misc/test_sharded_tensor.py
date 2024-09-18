@@ -60,14 +60,18 @@ def get_tensor(shape, dtype):
     ],
 )
 @pytest.mark.parametrize(
-    "shard_orientation, tensor_shape, shard_scheme, shard_shape, grid_override, direct_read_write_type",
+    "shard_orientation, tensor_shape, shard_scheme, shard_shape, shard_grid, direct_read_write_type",
     [
         (
             ttnn.ShardOrientation.ROW_MAJOR,
             [1, 4, 64, 64],
             ttnn.TensorMemoryLayout.HEIGHT_SHARDED,
             (64, 64),
-            None,
+            ttnn.CoreRangeSet(
+                {
+                    ttnn.CoreRange(ttnn.CoreCoord(0, 0), ttnn.CoreCoord(3, 0)),  # 4 cores
+                }
+            ),
             DirectReadWriteType.READ_WRITE,
         ),
         (
@@ -271,17 +275,12 @@ def get_tensor(shape, dtype):
     ],
 )
 def test_tensor_conversion_between_torch_and_tt_tile(
-    tt_dtype, device, shard_orientation, tensor_shape, shard_scheme, shard_shape, grid_override, direct_read_write_type
+    tt_dtype, device, shard_orientation, tensor_shape, shard_scheme, shard_shape, shard_grid, direct_read_write_type
 ):
     dtype = tt_dtype_to_torch_dtype[tt_dtype]
     compute_grid = ttnn.CoreCoord(
         device.compute_with_storage_grid_size().x - 1, device.compute_with_storage_grid_size().y - 1
     )
-
-    if grid_override == None:
-        shard_grid = ttnn.CoreRangeSet({ttnn.CoreRange(ttnn.CoreCoord(0, 0), compute_grid)})
-    else:
-        shard_grid = grid_override
 
     shard_halo = False
     shard_spec = ttnn.ShardSpec(shard_grid, shard_shape, shard_orientation, shard_halo)
