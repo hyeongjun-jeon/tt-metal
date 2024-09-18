@@ -177,6 +177,7 @@ void JitBuildState::finish_init() {
     } else {
         this->link_objs_ += build_dir + "tmu-crt0k.o ";
     }
+    this->link_objs_ += build_dir + "substitutes.o ";
 
     // Note the preceding slash which defies convention as this gets appended to
     // the kernel name used as a path which doesn't have a slash
@@ -199,7 +200,6 @@ JitBuildDataMovement::JitBuildDataMovement(const JitBuildEnv& env, int which, bo
     uint32_t l1_cache_disable_mask = tt::llrt::OptionsG.get_feature_riscv_mask(tt::llrt::RunTimeDebugFeatureDisableL1DataCache);
 
     // TODO(pgk): build these once at init into built/libs!
-    this->srcs_.push_back("tt_metal/hw/toolchain/substitutes.cpp");
 
     this->lflags_ = env_.lflags_ + "-Os ";
 
@@ -270,7 +270,6 @@ JitBuildCompute::JitBuildCompute(const JitBuildEnv& env, int which, bool is_fw) 
                       "tt_metal/third_party/sfpi/include " + "-I" + env_.root_ + "tt_metal/hw/firmware/src " + "-I" +
                       env_.root_ + "tt_metal/third_party/tt_llk_" + env.arch_name_ + "/llk_lib ";
 
-    this->srcs_.push_back("tt_metal/hw/toolchain/substitutes.cpp");
     if (this->is_fw_) {
         this->srcs_.push_back("tt_metal/hw/firmware/src/trisc.cc");
     } else {
@@ -348,7 +347,6 @@ JitBuildEthernet::JitBuildEthernet(const JitBuildEnv& env, int which, bool is_fw
 
             this->includes_ += "-I " + env_.root_ + "tt_metal/hw/inc/ethernet ";
 
-            this->srcs_.push_back("tt_metal/hw/toolchain/substitutes.cpp");
             if (this->is_fw_) {
                 this->srcs_.push_back("tt_metal/hw/firmware/src/erisc.cc");
                 this->srcs_.push_back("tt_metal/hw/toolchain/erisc-early-exit.S");
@@ -384,7 +382,6 @@ JitBuildEthernet::JitBuildEthernet(const JitBuildEnv& env, int which, bool is_fw
             this->includes_ += "-I " + env_.root_ + "tt_metal/hw/firmware/src ";
 
             // TODO(pgk): build these once at init into built/libs!
-            this->srcs_.push_back("tt_metal/hw/toolchain/substitutes.cpp");
             this->srcs_.push_back("tt_metal/hw/firmware/src/" + env_.aliased_arch_name_ + "/noc.c");
             if (this->is_fw_) {
                 this->srcs_.push_back("tt_metal/hw/firmware/src/idle_erisc.cc");
