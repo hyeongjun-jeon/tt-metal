@@ -62,15 +62,11 @@ def run_moreh_nll_loss(shape, ignore_index, reduction, none_weight, device, comp
     )
 
     assert reduction in ["sum", "mean"]
-    if reduction == "sum":
-        reduction_mode = 1
-    else:
-        reduction_mode = 2
 
     tt_loss = ttnn.moreh_nll_loss(
         tt_input,
         tt_target,
-        reduction_mode,  # reduction_mean,
+        reduction,  # reduction_mean,
         weight_tensor=tt_weight,
         divisor_tensor=tt_divisor,
         output_tensor=tt_output,
@@ -81,10 +77,6 @@ def run_moreh_nll_loss(shape, ignore_index, reduction, none_weight, device, comp
     tt_loss_to_cpu = to_cpu(tt_loss, [1])
     rtol = atol = 0.05
     passing, out = comp_allclose_and_pcc(torch_loss, tt_loss_to_cpu, pcc=0.999, rtol=rtol, atol=atol)
-    tt_divisor_to_cpu = to_cpu(tt_divisor, tt_divisor.shape)
-    # print("Divisor: ", tt_divisor_to_cpu)
-    # print("CPU output: ", torch_loss)
-    # print("NPU output: ", tt_loss_to_cpu)
     logger.debug(f"Out passing (param)={passing}")
     logger.debug(f"Output pcc={out}")
     assert passing

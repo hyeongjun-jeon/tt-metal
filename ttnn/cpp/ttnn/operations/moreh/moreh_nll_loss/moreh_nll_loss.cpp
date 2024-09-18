@@ -7,6 +7,7 @@
 
 #include <optional>
 
+#include "moreh_nll_loss_helper.hpp"
 #include "moreh_nll_loss_step1/device/moreh_nll_loss_step1_device_operation.hpp"
 #include "moreh_nll_loss_step2/device/moreh_nll_loss_step2_device_operation.hpp"
 #include "ttnn/cpp/ttnn/operations/moreh/moreh_sum/moreh_sum.hpp"
@@ -16,7 +17,7 @@ namespace ttnn::operations::moreh::moreh_nll_loss {
 Tensor MorehNllLoss::invoke(
     const Tensor &input_tensor,
     const Tensor &target_tensor,
-    const uint32_t reduction_mode,
+    const std::string reduction_mode,
     const std::optional<const Tensor> weight_tensor,
     const std::optional<const Tensor> divisor_tensor,
     const std::optional<const Tensor> output_tensor,

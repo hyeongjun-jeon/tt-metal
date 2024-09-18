@@ -20,7 +20,7 @@ MorehNllLossStep2DeviceOperation::Factory::cached_program_t moreh_nll_loss_step2
     const std::optional<const Tensor> weight,
     const std::optional<const Tensor> divisor,
     const Tensor& output,
-    const uint32_t reduction_mode,
+    const std::string reduction_mode,
     const uint32_t ignore_index,
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config) {
     // split work
@@ -200,7 +200,7 @@ MorehNllLossStep2DeviceOperation::Factory::cached_program_t moreh_nll_loss_step2
     const std::optional<const Tensor> weight,
     const std::optional<const Tensor> divisor,
     const Tensor& output,
-    const uint32_t reduction_mode,
+    const std::string reduction_mode,
     const uint32_t ignore_index,
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config) {
     // split work
@@ -383,7 +383,7 @@ MorehNllLossStep2DeviceOperation::Factory::cached_program_t moreh_nll_loss_step2
     const std::optional<const Tensor> weight,
     const std::optional<const Tensor> divisor,
     const Tensor& output,
-    const uint32_t reduction_mode,
+    const std::string reduction_mode,
     const uint32_t ignore_index,
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config) {
     // split work
@@ -580,7 +580,7 @@ MorehNllLossStep2DeviceOperation::Factory::cached_program_t MorehNllLossStep2Dev
     const std::optional<const Tensor> weight = tensor_args.weight_tensor;
     const std::optional<const Tensor> divisor = tensor_args.divisor_tensor;
     const Tensor& output = tensor_return_value;
-    const uint32_t reduction_mode = operation_attributes.reduction_mode;
+    const std::string reduction_mode = operation_attributes.reduction_mode;
     const uint32_t ignore_index = operation_attributes.ignore_index;
     std::optional<const DeviceComputeKernelConfig> compute_kernel_config = operation_attributes.compute_kernel_config;
 

@@ -4,6 +4,7 @@
 
 #include "moreh_nll_loss_step2_device_operation.hpp"
 
+#include "ttnn/operations/moreh/moreh_nll_loss/moreh_nll_loss_helper.hpp"
 #include "ttnn/tensor/types.hpp"
 
 namespace ttnn::operations::moreh::moreh_nll_loss_step2 {
@@ -113,10 +114,17 @@ MorehNllLossStep2DeviceOperation::shape_return_value_t MorehNllLossStep2DeviceOp
 
 MorehNllLossStep2DeviceOperation::tensor_return_value_t MorehNllLossStep2DeviceOperation::create_output_tensors(
     const operation_attributes_t& operation_attributes, const tensor_args_t& tensor_args) {
+    if (operation_attributes.reduction_mode == NONE && tensor_args.output_tensor.has_value()) {
+        return tensor_args.output_tensor.value();
+    }
+
+    // In case reduction is 'sum' or 'mean' we need to create a tensor to save loss result and reduce it to
+    // tensor_args.output_tensor using moreh_sum() operation
     auto output_shape = compute_output_shapes(operation_attributes, tensor_args);
     auto dtype = tensor_args.input_tensor.get_dtype();
     Layout layout{Layout::TILE};
     auto device = tensor_args.input_tensor.device();
+
     return create_device_tensor(output_shape, dtype, layout, device, operation_attributes.memory_config);
 }
 
@@ -124,7 +132,7 @@ std::tuple<MorehNllLossStep2DeviceOperation::operation_attributes_t, MorehNllLos
 MorehNllLossStep2DeviceOperation::invoke(
     const Tensor& input_tensor,
     const Tensor& target_tensor,
-    const uint32_t reduction_mode,
+    const std::string reduction_mode,
     const std::optional<const Tensor> weight_tensor,
     const std::optional<const Tensor> divisor_tensor,
     const std::optional<const Tensor> output_tensor,

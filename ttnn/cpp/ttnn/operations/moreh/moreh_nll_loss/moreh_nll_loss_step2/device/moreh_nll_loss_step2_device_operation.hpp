@@ -17,7 +17,7 @@ namespace ttnn::operations::moreh::moreh_nll_loss_step2 {
 
 struct MorehNllLossStep2DeviceOperation {
     struct operation_attributes_t {
-        const uint32_t reduction_mode;
+        const std::string reduction_mode;
         const uint32_t ignore_index = std::numeric_limits<uint32_t>::max();
         const MemoryConfig memory_config;
         std::optional<const DeviceComputeKernelConfig> compute_kernel_config;
@@ -80,7 +80,7 @@ struct MorehNllLossStep2DeviceOperation {
     static std::tuple<operation_attributes_t, tensor_args_t> invoke(
         const Tensor& input_tensor,
         const Tensor& target_tensor,
-        const uint32_t reduction_mode,
+        const std::string reduction_mode,
         const std::optional<const Tensor> weight_tensor,
         const std::optional<const Tensor> divisor_tensor,
         const std::optional<const Tensor> output_tensor,

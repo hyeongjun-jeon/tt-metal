@@ -149,7 +149,7 @@ def run_moreh_nll_loss_unreduced(shape, ignore_index, none_weight, device, compu
         torch_input, torch_target, torch_weight, torch_output, device
     )
 
-    reduction_mode = 0  # none
+    reduction_mode = "none"
 
     tt_loss = ttnn.moreh_nll_loss(
         tt_input,

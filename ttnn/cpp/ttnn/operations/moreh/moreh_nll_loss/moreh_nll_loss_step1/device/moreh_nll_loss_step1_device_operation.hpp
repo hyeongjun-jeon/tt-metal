@@ -18,7 +18,7 @@ namespace ttnn::operations::moreh::moreh_nll_loss_step1 {
 
 struct MorehNllLossStep1DeviceOperation {
     struct operation_attributes_t {
-        const bool reduction_mean;
+        const std::string reduction_mode;
         const uint32_t ignore_index = std::numeric_limits<uint32_t>::max();
         const DataType output_dtype;
         const uint32_t channel_size;
@@ -81,7 +81,7 @@ struct MorehNllLossStep1DeviceOperation {
         const Tensor& target_tensor,
         const std::optional<const Tensor> weight_tensor,
         const int32_t ignore_index,
-        const bool reduction_mean,
+        const std::string reduction_mode,
         const DataType output_dtype,
         const uint32_t channel_size,
         const std::optional<ttnn::MemoryConfig>& memory_config,
