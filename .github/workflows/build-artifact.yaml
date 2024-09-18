@@ -38,20 +38,32 @@ jobs:
       - uses: tenstorrent-metal/metal-workflows/.github/actions/checkout-with-submodule-lfs@v2.0.0
       - name: Set up dynamic env vars for build
         run: |
+          echo "TT_METAL_HOME=$(pwd)" >> $GITHUB_ENV
           echo "RUNNER_UID=$(id -u)" >> $GITHUB_ENV
           echo "RUNNER_GID=$(id -g)" >> $GITHUB_ENV
       - name: Update submodules
         run: |
           git submodule update --init --recursive
-      - name: Build tt-metal and libs
-        uses: ./.github/actions/docker-run
+      - name: Generate docker tag
+        id: generate-docker-tag
+        uses: ./.github/actions/generate-docker-tag
         with:
-          docker_username: ${{ github.actor }}
-          docker_password: ${{ secrets.GITHUB_TOKEN }}
-          docker_os_arch: ${{ inputs.os }}
-          docker_opts: |
+          image: ${{ inputs.os }}
+      - name: Build tt-metal and libs
+        uses: addnab/docker-run-action@v3
+        with:
+          image: ${{ env.TT_METAL_DOCKER_IMAGE_TAG }}
+          options: |
+            -u ${{ env.RUNNER_UID }}:${{ env.RUNNER_GID }}
+            -v ${{ github.workspace }}:${{ github.workspace }}
+            -v /etc/passwd:/etc/passwd:ro
+            -v /etc/shadow:/etc/shadow:ro
+            -v /etc/bashrc:/etc/bashrc:ro
+            -e TT_METAL_HOME=${{ github.workspace }}
+            -e PYTHONPATH=${{ github.workspace }}
             -e ARCH_NAME=${{ matrix.arch }}
-          run_args: |
+            -w ${{ github.workspace }}
+          run: |
             nice -n 19 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ inputs.build-type }} -DENABLE_TRACY=${{ inputs.tracy }}
             nice -n 19 cmake --build build --target tests
             nice -n 19 cmake --build build --target install
