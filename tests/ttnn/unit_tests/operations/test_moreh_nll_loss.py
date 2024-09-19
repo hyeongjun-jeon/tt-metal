@@ -97,14 +97,14 @@ def run_moreh_nll_loss_backward(shape, ignore_index, reduction_mean, none_weight
     (tt_input, tt_target, tt_weight, tt_divisor, tt_output) = get_tt_tensors(
         torch_input, torch_target, torch_weight, torch_divisor, torch_output, device
     )
-    reduction_mode = "mean"
+    reduction = "mean"
     if reduction_mean == False:
         tt_divisor = None
-        reduction_mode = "sum"
+        reduction = "sum"
     tt_loss = ttnn.moreh_nll_loss(
         tt_input,
         tt_target,
-        reduction_mode,
+        reduction,
         weight_tensor=tt_weight,
         divisor_tensor=tt_divisor,
         output_tensor=tt_output,

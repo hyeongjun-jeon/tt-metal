@@ -106,14 +106,14 @@ MorehNllLossStep2DeviceOperation::shape_return_value_t MorehNllLossStep2DeviceOp
     }
 
     const auto padding = Padding(dimensions_pads, Padding::PadValue::Any);
-    auto output_shape = ttnn::Shape(tt::tt_metal::Shape{output_shape_vec, padding});
+    auto output_shape = Shape(tt::tt_metal::LegacyShape{output_shape_vec, padding});
 
     return output_shape;
 }
 
 MorehNllLossStep2DeviceOperation::tensor_return_value_t MorehNllLossStep2DeviceOperation::create_output_tensors(
     const operation_attributes_t& operation_attributes, const tensor_args_t& tensor_args) {
-    if (operation_attributes.reduction_mode == NONE && tensor_args.output_tensor.has_value()) {
+    if (operation_attributes.reduction == NONE && tensor_args.output_tensor.has_value()) {
         return tensor_args.output_tensor.value();
     }
 
@@ -131,7 +131,7 @@ std::tuple<MorehNllLossStep2DeviceOperation::operation_attributes_t, MorehNllLos
 MorehNllLossStep2DeviceOperation::invoke(
     const Tensor& input_tensor,
     const Tensor& target_tensor,
-    const std::string reduction_mode,
+    const std::string reduction,
     const std::optional<const Tensor> weight_tensor,
     const std::optional<const Tensor> divisor_tensor,
     const std::optional<const Tensor> output_tensor,
@@ -140,7 +140,7 @@ MorehNllLossStep2DeviceOperation::invoke(
     std::optional<const ttnn::DeviceComputeKernelConfig> compute_kernel_config) {
     return {
         operation_attributes_t{
-            reduction_mode,
+            reduction,
             ignore_index < 0 ? std::numeric_limits<uint32_t>::max() : ignore_index,
             memory_config.value_or(input_tensor.memory_config()),
             compute_kernel_config},

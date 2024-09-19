@@ -67,14 +67,14 @@ MorehNllLossStep1DeviceOperation::invoke(
     const Tensor& target_tensor,
     const std::optional<const Tensor> weight_tensor,
     const int32_t ignore_index,
-    const std::string reduction_mode,
+    const std::string reduction,
     const DataType output_dtype,
     const uint32_t channel_size,
     const std::optional<ttnn::MemoryConfig>& memory_config,
     std::optional<const ttnn::DeviceComputeKernelConfig> compute_kernel_config) {
     return {
         operation_attributes_t{
-            reduction_mode,
+            reduction,
             ignore_index < 0 ? std::numeric_limits<uint32_t>::max() : ignore_index,
             output_dtype,
             channel_size,
