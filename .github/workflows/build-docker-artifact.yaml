@@ -54,7 +54,7 @@ jobs:
       - name: Determine docker image tag
         uses: ./.github/actions/generate-docker-tag
         with:
-          image: tt-metalium/${{ inputs.os }}
+          image: ${{ inputs.os }}
       # - name: Build Docker image if deps file(s) changed
       #   if: steps.changed-files-specific.outputs.any_changed == 'true'
       #   run: |
