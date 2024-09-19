@@ -26,13 +26,13 @@ void MorehGroupNormBackwardGammaBetaGradOperation::validate_tensors(
 
     using namespace tt::operations::primary;
 
-    check_tensor(output_grad, "moreh_groupnorm_backward_gamma_beta_grad", "output_grad");
-    check_tensor(input, "moreh_groupnorm_backward_gamma_beta_grad", "input");
-    check_tensor(mean, "moreh_groupnorm_backward_gamma_beta_grad", "mean");
-    check_tensor(rstd, "moreh_groupnorm_backward_gamma_beta_grad", "rstd");
+    check_tensor(output_grad, "moreh_group_norm_backward_gamma_beta_grad", "output_grad");
+    check_tensor(input, "moreh_group_norm_backward_gamma_beta_grad", "input");
+    check_tensor(mean, "moreh_group_norm_backward_gamma_beta_grad", "mean");
+    check_tensor(rstd, "moreh_group_norm_backward_gamma_beta_grad", "rstd");
 
-    check_tensor(gamma_grad, "moreh_groupnorm_backward_gamma_beta_grad", "gamma_grad");
-    check_tensor(beta_grad, "moreh_groupnorm_backward_gamma_beta_grad", "beta_grad");
+    check_tensor(gamma_grad, "moreh_group_norm_backward_gamma_beta_grad", "gamma_grad");
+    check_tensor(beta_grad, "moreh_group_norm_backward_gamma_beta_grad", "beta_grad");
 
     // output_grad (N, C, H, W)
     auto C = output_grad.get_shape().value[1];

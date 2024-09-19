@@ -22,14 +22,14 @@ void MorehGroupNormBackwardInputGradOperation::validate_tensors(
 
     using namespace tt::operations::primary;
 
-    check_tensor(output_grad, "moreh_groupnorm_backward_input_grad", "output_grad");
-    check_tensor(input, "moreh_groupnorm_backward_input_grad", "input");
-    check_tensor(mean, "moreh_groupnorm_backward_input_grad", "mean");
-    check_tensor(rstd, "moreh_groupnorm_backward_input_grad", "rstd");
+    check_tensor(output_grad, "moreh_group_norm_backward_input_grad", "output_grad");
+    check_tensor(input, "moreh_group_norm_backward_input_grad", "input");
+    check_tensor(mean, "moreh_group_norm_backward_input_grad", "mean");
+    check_tensor(rstd, "moreh_group_norm_backward_input_grad", "rstd");
 
-    check_tensor(input_grad, "moreh_groupnorm_backward_input_grad", "input_grad");
+    check_tensor(input_grad, "moreh_group_norm_backward_input_grad", "input_grad");
 
-    check_tensor(gamma, "moreh_groupnorm_backward_input_grad", "gamma");
+    check_tensor(gamma, "moreh_group_norm_backward_input_grad", "gamma");
 
     // output_grad (N, C, H, W)
     auto C = output_grad.get_shape().value[1];
