@@ -57,7 +57,6 @@ runs:
           ${{ inputs.docker_opts }}
           -e LOGURU_LEVEL=${{ env.LOGURU_LEVEL }}
           -e PYTHONPATH=/usr/app
-          -e TT_METAL_HOME=/usr/app
           ${{ inputs.device }}
         run: |
           cp -r /github_workspace/* /usr/app/
