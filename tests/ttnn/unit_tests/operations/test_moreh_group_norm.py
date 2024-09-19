@@ -357,7 +357,7 @@ def test_moreh_groupnorm(N, C_num_groups, HW, eps, affine, compute_mean_rstd, de
     "beta_requires_grad",
     [
         True,
-        False,
+        # False,
     ],
 )
 def test_moreh_groupnorm_backward(

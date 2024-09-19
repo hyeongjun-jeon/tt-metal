@@ -13,3 +13,6 @@ matmul = ttnn._ttnn.operations.moreh.moreh_matmul
 mean = ttnn._ttnn.operations.moreh.moreh_mean
 mean_backward = ttnn._ttnn.operations.moreh.moreh_mean_backward
 sum = ttnn._ttnn.operations.moreh.moreh_sum
+matmul = ttnn._ttnn.operations.moreh.moreh_matmul
+group_norm = ttnn._ttnn.operations.moreh.moreh_group_norm
+group_norm_backward = ttnn._ttnn.operations.moreh.moreh_group_norm_backward

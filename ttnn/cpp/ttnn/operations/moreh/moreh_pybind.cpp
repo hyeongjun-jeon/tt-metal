@@ -33,5 +33,9 @@ void bind_moreh_operations(py::module &module) {
     moreh_nll_loss_backward::bind_moreh_nll_loss_backward_operation(module);
     moreh_nll_loss_unreduced_backward::bind_moreh_nll_loss_unreduced_backward_operation(module);
     moreh_sum::bind_moreh_sum_operation(module);
+    moreh_nll_loss_backward::bind_moreh_nll_loss_backward_operation(module);
+    moreh_matmul::bind_moreh_matmul_operation(module);
+    moreh_group_norm::bind_moreh_group_norm_operation(module);
+    moreh_group_norm_backward::bind_moreh_group_norm_backward_operation(module);
 }
 }  // namespace ttnn::operations::moreh
