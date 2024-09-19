@@ -10,11 +10,7 @@
 
 namespace ttnn::operations::moreh::moreh_adamw {
 
-// A composite operation is an operation that calls multiple operations in sequence
-// It is written using invoke and can be used to call multiple primitive and/or composite operations
 struct MorehAdamw {
-    // The user will be able to call this method as `Tensor output = ttnn::composite_example(input_tensor)` after the op
-    // is registered
     static std::vector<Tensor> invoke(
         const Tensor& param_in,
         const Tensor& grad,
